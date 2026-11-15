@@ -16,7 +16,7 @@ from app.routes.appointments import router as appointments_router
 from app.routes.auth import router as auth_router
 from app.routes.booking_chat import router as booking_chat_router
 from app.routes.client import router as client_router
-from app.routes.knowledge import router as knowledge_router
+from app.routes.knowledge import admin_router as knowledge_admin_router, router as knowledge_router
 from app.routes.leads import router as leads_router
 from app.routes.public_booking import router as public_booking_router
 from app.routes.team import router as team_router
@@ -35,7 +35,7 @@ app = FastAPI(title="ORQENTIVA Technologies", version="0.2.0", description="API 
               lifespan=lifespan)
 
 for router in (leads_router, auth_router, admin_router, client_router, team_router, public_booking_router,
-               booking_chat_router, knowledge_router, whatsapp_router, appointments_router):
+               booking_chat_router, knowledge_router, knowledge_admin_router, whatsapp_router, appointments_router):
     app.include_router(router)
 
 PRIVATE_PREFIXES = ("/auth/", "/admin/", "/client/", "/book/")

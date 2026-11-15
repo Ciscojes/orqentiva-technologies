@@ -43,10 +43,13 @@ MAX_CONTEXT_CHARS = 6000
 MAX_CANDIDATES = 4
 
 
-def answer(session, business_id, question, language, business_name, use_llm=False):
+def answer(session, business_id, question, language, business_name, use_llm=False, include_drafts=False):
+    """include_drafts solo lo usa "Probar pregunta" del panel; el chat público nunca ve borradores."""
     terms = tokens(question) - tokens(business_name)
-    docs = session.scalars(select(KnowledgeDocument).where(KnowledgeDocument.business_id==business_id,
-                           KnowledgeDocument.published.is_(True)).order_by(KnowledgeDocument.id))
+    query = select(KnowledgeDocument).where(KnowledgeDocument.business_id==business_id)
+    if not include_drafts:
+        query = query.where(KnowledgeDocument.published.is_(True))
+    docs = session.scalars(query.order_by(KnowledgeDocument.id))
     hits = []
     every = []
     for doc in docs:
