@@ -67,7 +67,7 @@ export default function BookingChat({business,language}:{business:string;languag
     {!done&&<form onSubmit={submit}><fieldset disabled={busy} className="dashboard-fields">
       {mode==='booking'&&!!turn?.options.length&&<label>{t.choose}<select value="" onChange={e=>void send(e.target.value)}><option value="">{t.choose}</option>{turn.options.map((option,i)=><option key={i}>{option}</option>)}</select></label>}
       <label>{t.input}<input maxLength={350} value={input} onChange={e=>setInput(e.target.value)}/></label>
-      <button className="dashboard-secondary" disabled={!input.trim()}>{t.send}</button>
+      <button type="submit" className="dashboard-secondary" disabled={!input.trim()}>{t.send}</button>
       {mode==='booking'&&turn?.proposal&&<button className="btn btn-primary" type="button" onClick={()=>void send(t.yes)}>{t.yes}</button>}
     </fieldset></form>}
     {!!lines.length&&<button className="dashboard-secondary" disabled={busy} onClick={restart}>{t.restart}</button>}

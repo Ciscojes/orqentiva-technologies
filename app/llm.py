@@ -139,7 +139,7 @@ def request_json(system: str, context: dict) -> dict | None:
     try:
         content = call_model(payload)
         # Algunos modelos envuelven el JSON en un bloque de código.
-        content = re.sub(r"^```(?:json)?\s*|\s*```$", "", content.strip())
+        content = re.sub(r"(?:^```(?:json)?\s*)|(?:\s*```$)", "", content.strip())
         data = json.loads(content)
     except httpx.HTTPStatusError as exc:
         # El cuerpo de error del proveedor explica la causa (clave, modelo, límite); nunca incluye la clave.

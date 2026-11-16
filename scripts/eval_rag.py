@@ -162,9 +162,13 @@ def main():
             "- Conjunto pequeño y ficticio, escrito por el autor; no sustituye una evaluación con preguntas de clientes reales.",
             "- Mide la recuperación, no la calidad de la respuesta redactada por el LLM ni sus validaciones.",
         ])
-        Path(args.report).parent.mkdir(parents=True, exist_ok=True)
-        Path(args.report).write_bytes(text.replace("\n", os.linesep if os.name == "nt" else "\n").encode("utf-8") + b"\n")
-        print(f"\nInforme escrito en {args.report}")
+        # El informe solo se guarda como .md dentro del proyecto, nunca en otra ruta del equipo.
+        target = (ROOT / args.report).resolve()
+        if not target.is_relative_to(ROOT) or target.suffix != ".md":
+            raise SystemExit("--report debe ser un archivo .md dentro del proyecto.")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(text.replace("\n", os.linesep if os.name == "nt" else "\n").encode("utf-8") + b"\n")
+        print(f"\nInforme escrito en {target}")
 
 
 if __name__ == "__main__":

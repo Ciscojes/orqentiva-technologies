@@ -190,7 +190,7 @@ export default function KnowledgeManager({ language, basePath, statusPath, onSes
           <small>{draft.body.length} / 6000</small>
           <label className="client-checkbox"><input type="checkbox" checked={draft.published} onChange={e => setDraft({ ...draft, published: e.target.checked })} />{t.publish}</label>
           {dirty && <small className="unsaved-note">{t.unsaved}</small>}
-          <button className="btn btn-primary" disabled={!draft.title.trim() || !draft.body.trim()}>{busy ? t.saving : t.save}</button>
+          <button type="submit" className="btn btn-primary" disabled={!draft.title.trim() || !draft.body.trim()}>{busy ? t.saving : t.save}</button>
         </fieldset>
       </form>
       <QuestionTester language={language} basePath={basePath} onSessionEnded={onSessionEnded} />

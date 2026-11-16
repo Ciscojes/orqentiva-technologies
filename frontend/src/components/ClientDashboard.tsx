@@ -300,7 +300,7 @@ function Team({data,language,onSaved,onSessionEnded}:Props & {data:Dashboard;onS
       <label>{es?"Nombre público del profesional":"Public professional name"}<input required maxLength={100} value={editing.name} onChange={e=>setEditing({...editing,name:e.target.value})}/></label>
       <fieldset><legend>{copy[language].catalog}</legend>{data.services.map(s=><label key={s.id} className="client-checkbox"><input type="checkbox" checked={editing.service_ids.includes(s.id)} onChange={e=>setEditing({...editing,service_ids:e.target.checked?[...editing.service_ids,s.id]:editing.service_ids.filter(id=>id!==s.id)})}/>{s.name}</label>)}</fieldset>
       <WeekFields days={editing.days} prefix="member" language={language} busy={busy} change={change}/>
-      <button className="btn btn-primary">{copy[language].save}</button><button type="button" className="dashboard-secondary" onClick={()=>setEditing(null)}>{copy[language].cancel}</button>
+      <button type="submit" className="btn btn-primary">{copy[language].save}</button><button type="button" className="dashboard-secondary" onClick={()=>setEditing(null)}>{copy[language].cancel}</button>
       {failed&&<p role="alert">{copy[language].error}</p>}
     </fieldset></form>}
   </section>;
