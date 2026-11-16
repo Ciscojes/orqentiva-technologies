@@ -117,3 +117,18 @@ Límites de esta ampliación:
 - La importación de PDF se probó con PDF generados en las pruebas; no con documentos reales de negocios ni escaneados.
 - No se probó en Safari, teléfonos reales ni con lectores de pantalla.
 - El recorrido visual de reservas públicas y confirmación sigue sin certificarse.
+
+## Ampliación del 15 de noviembre de 2026: RAG semántico (SPEC-019)
+
+Rama `rag-semantico`. Especificación: [SPEC-019](../specs/019-rag-semantico/spec.md). Migración `g019knowledgevectors` y dependencia `fastembed`.
+
+| Verificación | Resultado |
+| --- | --- |
+| Suite Python | 254 pruebas aprobadas, 6 nuevas con un modelo de embeddings simulado; la misma falla previa de Python 3.10 indicada arriba |
+| Compilación TypeScript/Vite y lint oxlint | Aprobados |
+| Línea base de recuperación ([informe](evaluation-019/linea-base.md)) | Palabras con respaldo: párrafo correcto en 30/32 enviando 24,4 párrafos de media; sin respaldo (base > 6 000 caracteres): 8/32, y 0/22 coloquiales |
+| Primera medición con el modelo local real, ejecutada por el autor en Windows ([informe](evaluation-019/informe-inicial-4-parrafos.md)) | Enviando siempre 4 párrafos: correcto en primer lugar 22/32 (palabras: 8/32); correcto en lo enviado 26/32 (palabras sin respaldo: 8/32; con respaldo: 30/32 enviando 24,4 párrafos). Motivó el envío por espacio descrito en SPEC-019 |
+| Diseño final con MiniLM, ejecutado por el autor ([informe](evaluation-019/informe-rag.md)) | Base pequeña: correcto en lo enviado 32/32 (antes 30/32) y en primer lugar 22/32 (antes 8/32). Base grande simulada: 26/32 (palabras: 8/32), coloquiales 16/22 (palabras: 0/22). 192 consultas en 3,7 s |
+| Comparación con mpnet ([informe](evaluation-019/informe-rag-mpnet.md)) | Base pequeña 32/32; base grande 30/32, coloquiales 20/22; 6,4 s. Se mantiene MiniLM como predeterminado (ver SPEC-019) |
+
+Límites: el entorno aislado de desarrollo no puede descargar modelos de Hugging Face; la integración con fastembed y el modelo real se ejecutó en el equipo del autor mediante la evaluación, no en la aplicación en marcha. El conjunto de evaluación es pequeño y ficticio, y mide la recuperación, no la calidad de la respuesta redactada por el LLM.

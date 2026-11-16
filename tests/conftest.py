@@ -10,6 +10,8 @@ os.environ["ORQENTIVA_DB"] = str(Path(_temporary.name) / "demo.sqlite3")
 # Vacías antes de importar la aplicación: la suite nunca usa la clave real del archivo .env.
 os.environ["LLM_API_KEY"] = ""
 os.environ["LLM_MODEL"] = ""
+# Sin modelo de embeddings real: las pruebas de búsqueda por significado instalan uno simulado.
+os.environ["EMBEDDINGS_PROVIDER"] = "none"
 
 
 @pytest.fixture(scope="session", autouse=True)

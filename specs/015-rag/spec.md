@@ -12,7 +12,7 @@ Responder preguntas sobre las políticas del negocio en lenguaje natural, sin in
 - La interfaz indica «Respuesta redactada con IA a partir de:» y muestra las fuentes.
 
 ## Fuera de alcance
-Embeddings, base vectorial y memoria de conversación.
+Embeddings, base vectorial y memoria de conversación. Los embeddings se incorporan en [SPEC-019](../019-rag-semantico/spec.md).
 
 ## Ampliación
 SPEC-018 añade la gestión desde los paneles: «Probar pregunta» (misma consulta, con borradores opcionales y solo desde los paneles), importación de PDF, eliminación e historial de cambios.

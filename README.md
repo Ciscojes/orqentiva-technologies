@@ -28,7 +28,7 @@ El grafo de LangGraph tiene tres nodos: `understand` (LLM opcional), `interpret`
 
 Las preguntas sobre el negocio usan RAG ([SPEC-015](specs/015-rag/spec.md)):
 
-1. **Recuperación:** búsqueda léxica en los párrafos publicados del negocio. Si no encuentra nada y los documentos caben en 6 000 caracteres, el LLM los recibe todos para entender sinónimos («¿me regresan la plata si falto?»).
+1. **Recuperación híbrida ([SPEC-019](specs/019-rag-semantico/spec.md)):** combina la búsqueda por palabras con la búsqueda por significado (embeddings de un modelo multilingüe que corre en el servidor, sin coste ni envío de datos a terceros), para entender preguntas como «¿me regresan la plata si falto?». El LLM recibe los párrafos de más a menos relevante hasta llenar 6 000 caracteres. Sin embeddings, búsqueda léxica y, si no encuentra nada y los documentos caben en 6 000 caracteres, todos los párrafos.
 2. **Generación:** el LLM redacta una respuesta breve usando solo esos párrafos e indica cuáles usó.
 3. **Validación:** se descarta la respuesta si cita párrafos que no recibió o si contiene cifras que no aparecen en ellos. En ese caso, o sin LLM, se muestra el párrafo literal.
 
@@ -42,6 +42,8 @@ LLM_API_KEY=tu-clave
 LLM_MODEL=openai/gpt-oss-20b
 LLM_BASE_URL=https://api.groq.com/openai/v1
 ```
+
+La búsqueda por significado viene activada con el modelo local (`EMBEDDINGS_PROVIDER=local`). La primera vez descarga unos 220 MB; conviene hacerlo antes de una presentación con `python scripts/index_knowledge.py`. Para desactivarla, `EMBEDDINGS_PROVIDER=none`; para usar OpenAI, `EMBEDDINGS_PROVIDER=openai` y `EMBEDDINGS_API_KEY`. La evaluación se repite con `python scripts/eval_rag.py`.
 
 La API lee esas variables al arrancar, también en la demo con SQLite, y lo indica en su terminal: `LLM activo: modelo ... en ...` o `LLM inactivo: el chat usa solo reglas (...)`. Una variable definida en la terminal (`$env:LLM_MODEL = "..."`) tiene prioridad sobre el archivo. `python scripts/check_llm.py` comprueba la clave y lista los modelos si falla. Las pruebas nunca usan la clave real.
 

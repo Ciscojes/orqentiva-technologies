@@ -14,7 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field, StrictBool
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app import llm
+from app import embeddings, llm
 from app.auth import current_user, require_super_admin
 from app.deps import Database, Tenant
 from app.models import Business, KnowledgeChange, KnowledgeDocument, User
@@ -99,6 +99,7 @@ def create_document(session, business_id, actor, payload: DocumentIn):
     if doc.published:
         record(session, business_id, actor, "published", doc.id, after=(doc.title, doc.body))
     session.commit()
+    knowledge.index_business(session, business_id)
     return view(doc)
 
 
@@ -114,6 +115,7 @@ def update_document(session, business_id, actor, document_id, payload: DocumentI
     if doc.published != was_published:
         record(session, business_id, actor, "published" if doc.published else "unpublished", doc.id, after=after)
     session.commit()
+    knowledge.index_business(session, business_id)
     return view(doc)
 
 
@@ -122,6 +124,7 @@ def delete_document(session, business_id, actor, document_id):
     record(session, business_id, actor, "deleted", doc.id, before=(doc.title, doc.body))
     session.delete(doc)
     session.commit()
+    knowledge.index_business(session, business_id)
 
 
 def history(session, business_id, limit):
@@ -210,6 +213,7 @@ async def import_pdf(request: Request, session: Session, business_id: str, actor
         record(session, business_id, actor, "imported", doc.id, after=(doc.title, doc.body))
         created.append(doc)
     session.commit()
+    knowledge.index_business(session, business_id)
     return [view(doc) for doc in created]
 
 
@@ -220,9 +224,13 @@ def documents(business_id: Tenant, session: Database):
     return list_documents(session, business_id)
 
 
+def search_status():
+    return {"llm_enabled": llm.enabled(), "embeddings": embeddings.status()}
+
+
 @router.get("/status")
 def status(business_id: Tenant):
-    return {"llm_enabled": llm.enabled()}
+    return search_status()
 
 
 @router.get("/history")
@@ -266,7 +274,7 @@ def admin_business(session, business_id):
 
 @admin_router.get("/llm-status")
 def admin_status():
-    return {"llm_enabled": llm.enabled()}
+    return search_status()
 
 
 @admin_router.get("/knowledge-changes")
