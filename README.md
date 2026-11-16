@@ -187,7 +187,13 @@ Los límites de peticiones viven en memoria, así que la publicación usa una so
 
 ## Usuarios de prueba
 
-Disponibles solo en la demostración local aislada (`tfm-demo.sqlite3`), con datos ficticios.
+Para presentar el proyecto en el entorno de desarrollo (PostgreSQL, puerto 5178), con Docker Desktop abierto:
+
+```powershell
+.\scripts\iniciar.ps1 -Demo
+```
+
+Abrir http://127.0.0.1:5178/#access. `-Demo` ejecuta `scripts/seed_demo_data.py` después de las migraciones: crea, solo si faltan, servicios, horario, trabajadores, citas futuras y base de conocimiento de alfa y beta, y deja estas tres cuentas activas con la contraseña de la tabla. Se puede repetir sin duplicar datos y se niega a ejecutarse contra una base que no sea local. Las mismas cuentas existen en la demostración aislada (`tfm-demo.sqlite3`, puerto 5179). Todos los datos son ficticios.
 
 | Rol | Usuario | Contraseña |
 | --- | --- | --- |
@@ -195,7 +201,7 @@ Disponibles solo en la demostración local aislada (`tfm-demo.sqlite3`), con dat
 | Barbería Alfa | alfa@example.com | Orqentiva-Demo-2026! |
 | Barbería Beta | beta@example.com | Orqentiva-Demo-2026! |
 
-Reservas públicas: http://127.0.0.1:5179/#reservar/alfa y http://127.0.0.1:5179/#reservar/beta
+Reservas públicas: http://127.0.0.1:5178/#reservar/alfa y http://127.0.0.1:5178/#reservar/beta (en la demostración aislada, puerto 5179)
 
 ## Enlaces del proyecto
 
