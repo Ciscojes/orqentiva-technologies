@@ -22,9 +22,23 @@ La recuperación por palabras solo encuentra párrafos que comparten términos c
 ## Decisión tras la primera medición
 La primera versión enviaba siempre los 4 mejores párrafos ([informe](../../docs/evaluation-019/informe-inicial-4-parrafos.md), modelo local real): el correcto quedaba primero en 22/32 preguntas (8/32 con palabras) y llegaba al LLM en 26/32, frente a 8/32 de la búsqueda por palabras sin respaldo. Pero en una base pequeña recuperaba menos que el respaldo anterior, que enviaba casi todo (30/32). Por eso el envío pasó de un número fijo de párrafos a un espacio de 6 000 caracteres ordenado por relevancia: no empeora a las bases pequeñas y mantiene la mejora en las grandes.
 
+## Resultados con el modelo real
+
+Ejecutados por el autor en Windows sobre `evals/rag_cases.json` (32 preguntas). «Base grande» deja espacio solo para 4 párrafos, para simular una base varias veces mayor que los 6 000 caracteres.
+
+| Escenario | Palabras (antes) | MiniLM, 220 MB ([informe](../../docs/evaluation-019/informe-rag.md)) | mpnet, 1 GB ([informe](../../docs/evaluation-019/informe-rag-mpnet.md)) |
+| --- | --- | --- | --- |
+| Base pequeña: párrafo correcto en lo que recibe el LLM | 30/32 | 32/32 | 32/32 |
+| Base grande: párrafo correcto en lo que recibe el LLM | 8/32 | 26/32 | 30/32 |
+| Base grande: preguntas coloquiales | 0/22 | 16/22 | 20/22 |
+| Correcto en primer lugar | 8/32 | 22/32 | 23/32 |
+| Tiempo de 192 consultas | — | 3,7 s | 6,4 s |
+
+Decisión del autor: `paraphrase-multilingual-MiniLM-L12-v2` como modelo predeterminado. En bases pequeñas, las habituales hoy, ambos aciertan 32/32; mpnet solo mejora en bases grandes, a cambio de cuatro veces más memoria y casi el doble de tiempo, lo que limita los servidores económicos. Un negocio con una base grande puede usar mpnet con `EMBEDDINGS_MODEL`; los vectores se recalculan solos.
+
 ## Fuera de alcance
 pgvector e índices aproximados (la comparación se hace en Python; suficiente para cientos de párrafos por negocio), reordenamiento con un segundo modelo, umbrales de similitud para responder sin LLM, OCR y memoria de conversación.
 
 ## Verificación
 - `tests/test_semantic_rag.py` con un modelo de embeddings simulado (sin descargas): encuentra por significado lo que la búsqueda por palabras no encuentra, reutiliza vectores y recalcula solo lo editado, vuelve a palabras si el proveedor falla, mantiene privados los borradores, informa el estado y comprueba la coherencia del conjunto de evaluación.
-- `python scripts/eval_rag.py --report docs/evaluation-019/informe-rag.md` con el modelo local real. El entorno aislado de desarrollo no tiene acceso a Hugging Face; esta medición se ejecuta en el equipo del autor.
+- `python scripts/eval_rag.py --report docs/evaluation-019/informe-rag.md` con el modelo local real, ejecutado por el autor (el entorno aislado de desarrollo no tiene acceso a Hugging Face). Resultados arriba.
