@@ -54,6 +54,25 @@ class KnowledgeDocument(Base):
     published: Mapped[bool] = mapped_column(Boolean, server_default=text("false"), default=False)
 
 
+class KnowledgeChange(Base):
+    """Historial de la base de conocimiento: quién cambió qué documento y cómo estaba antes.
+
+    document_id no es clave foránea para conservar el registro cuando se elimina el documento.
+    """
+    __tablename__ = "knowledge_changes"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    business_id: Mapped[str] = mapped_column(ForeignKey("businesses.id"), index=True)
+    document_id: Mapped[int | None] = mapped_column(Integer)
+    action: Mapped[str] = mapped_column(String(20))
+    actor_email: Mapped[str] = mapped_column(String(254))
+    before_title: Mapped[str | None] = mapped_column(String(120))
+    before_body: Mapped[str | None] = mapped_column(Text)
+    after_title: Mapped[str | None] = mapped_column(String(120))
+    after_body: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
+                                                 default=lambda: datetime.now(timezone.utc))
+
+
 class Business(Base):
     __tablename__ = "businesses"
 

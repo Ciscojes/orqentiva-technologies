@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import AdminDashboard from "./AdminDashboard";
 import ClientDashboard from "./ClientDashboard";
+import { Icon } from "./PanelLayout";
 import type { Language } from "../services";
 
 type Account = { id: number; email: string; role: "super_admin" | "business_admin"; business_id: string | null };
@@ -45,7 +46,7 @@ export default function AccessPanel({ language, locationHash, onSessionChange }:
   const [password, setPassword] = useState("");
   const [notice, setNotice] = useState<Notice>(null);
   const sequence = useRef(0);
-  const welcome = useRef<HTMLHeadingElement>(null);
+  const welcome = useRef<HTMLParagraphElement>(null);
   const endSession = useCallback(() => { setAccount(null); setNotice("blocked"); }, []);
 
   useEffect(() => {
@@ -110,16 +111,15 @@ export default function AccessPanel({ language, locationHash, onSessionChange }:
     finally { setBusy(false); }
   }
 
-  return <section className="access-section" id="access" aria-labelledby="access-title">
-    <h1 id="access-title" tabIndex={-1}>{t.title}</h1><p>{t.intro}</p>
+  const accountBox = account && <div className="panel-account" aria-busy={busy}>
+    <p className="panel-account-email" ref={welcome} tabIndex={-1}><span className="sr-only">{t.welcome}: </span>{account.email}</p>
+    <small>{account.role === "super_admin" ? t.admin : t.business}</small>
+    <button type="button" className="panel-logout" onClick={logout} disabled={busy} title={t.logout} aria-label={t.logout}><Icon name="logout" /><span className="panel-logout-label">{busy ? t.busy : t.logout}</span></button>
+  </div>;
+  return <section className={account ? "access-section has-panel" : "access-section"} id="access" aria-labelledby="access-title">
+    <h1 id="access-title" tabIndex={-1} className={account ? "sr-only" : undefined}>{t.title}</h1>{!account && <p>{t.intro}</p>}
     {checking ? <p role="status">{t.checking}</p> : account ?
-      <><div className="access-card" aria-busy={busy}>
-        <h3 ref={welcome} tabIndex={-1}>{t.welcome}</h3>
-        <p>{account.email}</p><p><strong>{account.role === "super_admin" ? t.admin : t.business}</strong></p>
-        {account.business_id && <p>{t.company}: {account.business_id}</p>}
-        <button className="btn btn-primary" onClick={logout} disabled={busy}>{busy ? t.busy : t.logout}</button>
-        <button className="access-retry" onClick={refreshSession} disabled={busy}>{t.retry}</button>
-      </div>{account.role === "super_admin" && <AdminDashboard key={account.id} language={language} onSessionEnded={endSession} />}{account.role === "business_admin" && <ClientDashboard key={account.id} language={language} onSessionEnded={endSession} />}</> :
+      <>{account.role === "super_admin" && <AdminDashboard key={account.id} language={language} onSessionEnded={endSession} footer={accountBox} />}{account.role === "business_admin" && <ClientDashboard key={account.id} language={language} onSessionEnded={endSession} footer={accountBox} />}</> :
       <form className="contact-form" onSubmit={login} aria-busy={busy}>
         <label htmlFor="login-email">{t.email}</label>
         <input id="login-email" type="email" autoComplete="username" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} disabled={busy} />

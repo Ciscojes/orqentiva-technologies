@@ -44,7 +44,9 @@ Los documentos tienen empresa, título, texto y estado publicado. La consulta si
 2. **Generación.** Con el LLM activo, el modelo recibe la pregunta y solo los candidatos de ese negocio, y devuelve una respuesta breve con los ids de los párrafos usados.
 3. **Validación.** El servidor rechaza citas a párrafos no enviados y cifras que no aparezcan en los párrafos citados. Si el modelo no responde, falla o se rechaza su respuesta, se devuelve el párrafo literal (modo extractivo).
 
-No utiliza embeddings ni base vectorial: un negocio publica pocos párrafos y la recuperación léxica más el LLM cubre sinónimos sin costos añadidos. Las respuestas siempre muestran título y número de párrafo.
+No utiliza embeddings ni base vectorial: un negocio publica pocos párrafos y la recuperación léxica más el LLM cubre sinónimos sin costos añadidos. Las respuestas siempre muestran título y número de párrafo. El límite de 6 000 caracteres hace que, con muchos documentos, el respaldo deje de aplicarse; es la razón para evaluar embeddings en un incremento posterior.
+
+La base de conocimiento se gestiona desde los dos paneles (SPEC-018) con la misma lógica en el servidor (`app/routes/knowledge.py`). «Probar pregunta» ejecuta la misma consulta que el chat y puede incluir borradores, que el chat público nunca recibe. Los PDF se convierten en borradores con `pypdf`. Cada cambio se registra en `knowledge_changes` con la versión anterior y la nueva; el registro no depende del documento, por lo que sobrevive a su eliminación.
 
 ## Seguridad y límites
 

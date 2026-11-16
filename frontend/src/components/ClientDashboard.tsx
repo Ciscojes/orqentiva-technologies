@@ -1,12 +1,13 @@
-import { useEffect, useState, type FormEvent } from "react";
-import KnowledgeEditor from "./KnowledgeEditor";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import KnowledgeManager from "./KnowledgeManager";
+import PanelLayout, { type PanelGroup } from "./PanelLayout";
 import type { Language } from "../services";
 
 type Service = {id:number; name:string; price_crc:number; duration_minutes:number|null; is_active:boolean};
 type Day = {weekday:number; is_closed:boolean; opens_at:string|null; closes_at:string|null};
 type Hours = {configured:boolean; days:Day[]};
 type Booking = {id:number; customer_name:string; customer_contact?:string|null; starts_at:string; professional_id?:number; service_id?:number};
-type Dashboard = {team:Member[]; booking_enabled:boolean; business:{id:string; name:string; time_zone:string}; services:Service[]; hours:Hours; appointments:Booking[]};
+export type Dashboard = {team:Member[]; booking_enabled:boolean; business:{id:string; name:string; time_zone:string}; services:Service[]; hours:Hours; appointments:Booking[]};
 type Props = {language:Language; onSessionEnded:()=>void};
 const copy = {
   es: {
@@ -55,8 +56,30 @@ function Feedback({message,language}:{message:Message;language:Language}) {
   return message && <p className={success?"dashboard-success":"dashboard-error"} role={success?"status":"alert"}>{copy[language][message]}</p>;
 }
 
-export default function ClientDashboard({language,onSessionEnded}:Props) {
+type Section = "inicio"|"agenda"|"servicios"|"equipo"|"horario"|"conocimiento"|"enlace";
+const nav = {
+  es:{daily:"Día a día", business:"Mi negocio", assistant:"Asistente", inicio:"Resumen", agenda:"Agenda", servicios:"Servicios", equipo:"Trabajadores",
+    horario:"Horario", conocimiento:"Base de conocimiento", enlace:"Enlace de reservas", panel:"Panel del negocio",
+    today:"Citas hoy", upcoming:"Próximas citas", activeServices:"Servicios activos", team:"Trabajadores", nextTitle:"Próximas citas", noUpcoming:"No hay citas próximas.",
+    seeAgenda:"Ver agenda completa", setup:"Primeros pasos", stepServices:"Crea tus servicios con precio y duración", stepHours:"Guarda tu horario de atención",
+    stepTeam:"Añade a tus trabajadores", stepKnowledge:"Publica tu base de conocimiento", go:"Ir", done:"Hecho",
+    linkTitle:"Enlace de reservas", linkHelp:"Comparte este enlace en tu WhatsApp, Instagram o Google para que tus clientes reserven solos.",
+    copy:"Copiar enlace", copied:"Enlace copiado.", copyFailed:"No se pudo copiar. Selecciona el enlace y cópialo a mano.", openLink:"Abrir página de reservas",
+    inactive:"Tu cuenta está activa. Contacta con ORQENTIVA para gestionar tus servicios contratados.", unassigned:"Sin asignar"},
+  en:{daily:"Day to day", business:"My business", assistant:"Assistant", inicio:"Overview", agenda:"Schedule", servicios:"Services", equipo:"Staff",
+    horario:"Opening hours", conocimiento:"Knowledge base", enlace:"Booking link", panel:"Business dashboard",
+    today:"Appointments today", upcoming:"Upcoming appointments", activeServices:"Active services", team:"Staff", nextTitle:"Upcoming appointments", noUpcoming:"No upcoming appointments.",
+    seeAgenda:"See full schedule", setup:"Getting started", stepServices:"Create your services with price and duration", stepHours:"Save your opening hours",
+    stepTeam:"Add your staff", stepKnowledge:"Publish your knowledge base", go:"Go", done:"Done",
+    linkTitle:"Booking link", linkHelp:"Share this link on WhatsApp, Instagram or Google so customers can book on their own.",
+    copy:"Copy link", copied:"Link copied.", copyFailed:"Couldn't copy. Select the link and copy it manually.", openLink:"Open booking page",
+    inactive:"Your account is active. Contact ORQENTIVA to manage your contracted services.", unassigned:"Unassigned"},
+};
+
+export default function ClientDashboard({language,onSessionEnded,footer}:Props & {footer?:ReactNode}) {
   const t=copy[language];
+  const n=nav[language];
+  const [section,setSection]=useState<Section>("inicio");
   const [data,setData]=useState<Dashboard|null>(null);
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState(false);
@@ -78,34 +101,111 @@ export default function ClientDashboard({language,onSessionEnded}:Props) {
   },[reload,onSessionEnded]);
   const locale=language==="es"?"es-CR":"en-US";
   const money=new Intl.NumberFormat(locale,{style:"currency",currency:"CRC",maximumFractionDigits:0});
-  return <div className="admin-dashboard client-dashboard" aria-labelledby="client-title">
-    <header className="dashboard-heading"><div><span className="eyebrow">{t.title}</span><h3 id="client-title">{data?.business.name??t.title}</h3>{data?.booking_enabled&&<p>{t.intro}</p>}</div>
-      <button className="dashboard-secondary" disabled={loading||saving} onClick={()=>{setLoading(true);setError(false);setEditing(null);setServiceMessage(null);setReload(value=>value+1);}}>{t.refresh}</button></header>
-    {loading?<p role="status">{t.loading}</p>:error||!data?<p className="dashboard-error" role="alert">{t.error}</p>:!data.booking_enabled?<p>{language==="es"?"Tu cuenta está activa. Contacta con ORQENTIVA para gestionar tus servicios contratados.":"Your account is active. Contact ORQENTIVA to manage your contracted services."}</p>:<>
-      <p className="dashboard-count">{data.services.length} {t.countServices} · {data.appointments.length} {t.countBookings}</p>
-      <div className="client-section-links"><a href="#client-services">{t.catalog}</a><a href="#client-hours">{t.hours}</a><a href="#client-bookings">{t.bookings}</a></div>
-      <section id="client-services" className="dashboard-card" aria-labelledby="client-services-title"><h4 id="client-services-title">{t.catalog}</h4>
-        <div className="dashboard-layout"><div>{data.services.length===0?<p>{t.noServices}</p>:<ul className="business-list client-services">{data.services.map(service=><li key={service.id}>
-          <div><strong>{service.name}</strong><small>{money.format(service.price_crc)} · {service.duration_minutes===null?t.undefined:`${service.duration_minutes} ${t.minutes}`}</small>
-            <span className={`business-badge ${service.is_active?"is-active":"is-inactive"}`}>{service.is_active?t.active:t.inactive}</span></div>
-          <button className="dashboard-secondary" disabled={saving} onClick={()=>{setEditing(service.id);setServiceMessage(null);}}>{t.edit}<span className="sr-only">: {service.name}</span></button>
-        </li>)}</ul>}</div>
-        <div><ServiceEditor key={editing??"new"} language={language} service={data.services.find(service=>service.id===editing)} onSessionEnded={onSessionEnded}
-          onBusy={markBusy} onCancel={()=>{setEditing(null);setServiceMessage(null);}}
-          onSaved={service=>{setData(previous=>previous?{...previous,services:previous.services.some(item=>item.id===service.id)?previous.services.map(item=>item.id===service.id?service:item):[...previous.services,service]}:previous);setEditing(null);setServiceMessage("serviceSaved");}} />
-          <Feedback message={serviceMessage} language={language}/></div>
-        </div>
+  const enabled=!!data?.booking_enabled;
+  const groups:PanelGroup[]=enabled?[
+    {label:n.daily,sections:[{id:"inicio",label:n.inicio,icon:"home"},{id:"agenda",label:n.agenda,icon:"calendar"}]},
+    {label:n.business,sections:[{id:"servicios",label:n.servicios,icon:"tag"},{id:"equipo",label:n.equipo,icon:"users"},{id:"horario",label:n.horario,icon:"clock"}]},
+    {label:n.assistant,sections:[{id:"conocimiento",label:n.conocimiento,icon:"book"},{id:"enlace",label:n.enlace,icon:"link"}]},
+  ]:[{label:n.daily,sections:[{id:"inicio",label:n.inicio,icon:"home"}]}];
+  const go=(id:string)=>setSection(id as Section);
+  const refresh=()=>{setLoading(true);setError(false);setEditing(null);setServiceMessage(null);setReload(value=>value+1);};
+
+  let body;
+  if(loading) body=<p role="status">{t.loading}</p>;
+  else if(error||!data) body=<><p className="dashboard-error" role="alert">{t.error}</p><button className="dashboard-secondary" onClick={refresh}>{t.retry}</button></>;
+  else if(!enabled) body=<section className="dashboard-card"><p>{n.inactive}</p></section>;
+  else if(section==="inicio") body=<Overview data={data} language={language} go={go}/>;
+  else if(section==="agenda") body=<section id="client-bookings" className="dashboard-card" aria-labelledby="client-bookings-title"><h4 id="client-bookings-title">{t.bookings}</h4>
+      <p className="card-help">{t.zone}</p>
+      {data.appointments.length===0?<p>{t.noBookings}</p>:<Agenda data={data} language={language}/>}
+    </section>;
+  else if(section==="servicios") body=<section id="client-services" className="dashboard-card" aria-labelledby="client-services-title"><h4 id="client-services-title">{t.catalog}</h4>
+      <div className="dashboard-layout"><div>{data.services.length===0?<p>{t.noServices}</p>:<ul className="business-list client-services">{data.services.map(service=><li key={service.id}>
+        <div><strong>{service.name}</strong><small>{money.format(service.price_crc)} · {service.duration_minutes===null?t.undefined:`${service.duration_minutes} ${t.minutes}`}</small>
+          <span className={`business-badge ${service.is_active?"is-active":"is-inactive"}`}>{service.is_active?t.active:t.inactive}</span></div>
+        <button className="dashboard-secondary" disabled={saving} onClick={()=>{setEditing(service.id);setServiceMessage(null);}}>{t.edit}<span className="sr-only">: {service.name}</span></button>
+      </li>)}</ul>}</div>
+      <div><ServiceEditor key={editing??"new"} language={language} service={data.services.find(service=>service.id===editing)} onSessionEnded={onSessionEnded}
+        onBusy={markBusy} onCancel={()=>{setEditing(null);setServiceMessage(null);}}
+        onSaved={service=>{setData(previous=>previous?{...previous,services:previous.services.some(item=>item.id===service.id)?previous.services.map(item=>item.id===service.id?service:item):[...previous.services,service]}:previous);setEditing(null);setServiceMessage("serviceSaved");}} />
+        <Feedback message={serviceMessage} language={language}/></div>
+      </div>
+    </section>;
+  else if(section==="equipo") body=<Team data={data} language={language} onSessionEnded={onSessionEnded} onSaved={member=>setData(prev=>prev?{...prev,team:[...prev.team.filter(m=>m.id!==member.id),member].sort((a,b)=>a.id-b.id)}:prev)}/>;
+  else if(section==="horario") body=<HoursEditor key={reload} hours={data.hours} language={language} onSessionEnded={onSessionEnded} onBusy={markBusy}
+      onSaved={hours=>setData(previous=>previous?{...previous,hours}:previous)}/>;
+  else if(section==="conocimiento") body=<KnowledgeManager language={language} basePath="/client/documents" statusPath="/client/documents/status" onSessionEnded={onSessionEnded}/>;
+  else body=<BookingLink id={data.business.id} language={language}/>;
+
+  const label=groups.flatMap(group=>group.sections).find(item=>item.id===section)?.label??n.inicio;
+  return <PanelLayout language={language} title={data?.business.name??t.title} subtitle={n.panel} groups={groups} active={section} onSelect={go} footer={footer}>
+    <div className="admin-dashboard client-dashboard" aria-labelledby="client-title">
+      <header className="dashboard-heading"><div><span className="eyebrow">{data?.business.name??t.title}</span><h3 id="client-title">{label}</h3></div>
+        <button className="dashboard-secondary" disabled={loading||saving} onClick={refresh}>{t.refresh}</button></header>
+      {body}
+    </div>
+  </PanelLayout>;
+}
+
+function dayKey(date:Date,zone:string){return new Intl.DateTimeFormat("en-CA",{timeZone:zone,year:"numeric",month:"2-digit",day:"2-digit"}).format(date);}
+
+function Overview({data,language,go}:{data:Dashboard;language:Language;go:(id:string)=>void}){
+  const n=nav[language];
+  const [documents,setDocuments]=useState<number|null>(null);
+  useEffect(()=>{
+    const controller=new AbortController();
+    fetch("/client/documents",{credentials:"same-origin",cache:"no-store",signal:controller.signal})
+      .then(r=>r.ok?r.json():null).then(docs=>{if(docs)setDocuments(docs.filter((d:{published:boolean})=>d.published).length);}).catch(()=>{});
+    return()=>controller.abort();
+  },[]);
+  const zone=data.business.time_zone;
+  const now=new Date();
+  const today=dayKey(now,zone);
+  const future=data.appointments.filter(b=>new Date(b.starts_at)>=now).sort((a,b)=>a.starts_at.localeCompare(b.starts_at));
+  const todayCount=data.appointments.filter(b=>dayKey(new Date(b.starts_at),zone)===today).length;
+  const time=new Intl.DateTimeFormat(language==="es"?"es-CR":"en-US",{timeZone:zone,weekday:"short",day:"numeric",month:"short",hour:"numeric",minute:"2-digit"});
+  const person=(id?:number)=>data.team.find(m=>m.id===id)?.name??n.unassigned;
+  const service=(id?:number)=>data.services.find(s=>s.id===id)?.name??"";
+  const steps:[boolean,string,Section][]=[
+    [data.services.length>0,n.stepServices,"servicios"],[data.hours.configured,n.stepHours,"horario"],
+    [data.team.length>0,n.stepTeam,"equipo"],[(documents??0)>0,n.stepKnowledge,"conocimiento"]];
+  return <>
+    <div className="metric-grid">
+      <button type="button" className="metric" onClick={()=>go("agenda")}><span>{n.today}</span><strong>{todayCount}</strong></button>
+      <button type="button" className="metric" onClick={()=>go("agenda")}><span>{n.upcoming}</span><strong>{future.length}</strong></button>
+      <button type="button" className="metric" onClick={()=>go("servicios")}><span>{n.activeServices}</span><strong>{data.services.filter(s=>s.is_active).length}</strong></button>
+      <button type="button" className="metric" onClick={()=>go("equipo")}><span>{n.team}</span><strong>{data.team.length}</strong></button>
+    </div>
+    <div className="dashboard-layout">
+      <section className="dashboard-card"><h4>{n.nextTitle}</h4>
+        {future.length===0?<p>{n.noUpcoming}</p>:<ul className="business-list upcoming-list">{future.slice(0,5).map(b=><li key={b.id}>
+          <div><strong>{time.format(new Date(b.starts_at))}</strong><small>{b.customer_name}{service(b.service_id)?` · ${service(b.service_id)}`:""}</small></div>
+          <span className="business-badge is-active">{person(b.professional_id)}</span></li>)}</ul>}
+        <button type="button" className="dashboard-secondary" onClick={()=>go("agenda")}>{n.seeAgenda}</button>
       </section>
-      <HoursEditor key={reload} hours={data.hours} language={language} onSessionEnded={onSessionEnded} onBusy={markBusy}
-        onSaved={hours=>setData(previous=>previous?{...previous,hours}:previous)}/>
-      <KnowledgeEditor language={language} onSessionEnded={onSessionEnded}/>
-      <Team data={data} language={language} onSessionEnded={onSessionEnded} onSaved={member=>setData(prev=>prev?{...prev,team:[...prev.team.filter(m=>m.id!==member.id),member].sort((a,b)=>a.id-b.id)}:prev)}/>
-      <section id="client-bookings" className="dashboard-card" aria-labelledby="client-bookings-title"><h4 id="client-bookings-title">{t.bookings}</h4>
-        <p>{t.zone}</p>
-        {data.appointments.length===0?<p>{t.noBookings}</p>:<Agenda data={data} language={language}/>}
+      <section className="dashboard-card"><h4>{n.setup}</h4>
+        <ul className="business-list setup-list">{steps.map(([done,text,target])=><li key={target}>
+          <div><span className={`step-dot${done?" is-done":""}`} aria-hidden="true">{done?"✓":""}</span>{text}</div>
+          {done?<span className="sr-only">{n.done}</span>:<button type="button" className="dashboard-secondary" onClick={()=>go(target)}>{n.go}<span className="sr-only">: {text}</span></button>}
+        </li>)}</ul>
       </section>
-    </>}
-  </div>;
+    </div>
+  </>;
+}
+
+function BookingLink({id,language}:{id:string;language:Language}){
+  const n=nav[language];
+  const url=`${window.location.origin}${window.location.pathname}#reservar/${id}`;
+  const [state,setState]=useState<"idle"|"ok"|"fail">("idle");
+  async function copyLink(){
+    try{await navigator.clipboard.writeText(url);setState("ok");}catch{setState("fail");}
+  }
+  return <section className="dashboard-card"><h4>{n.linkTitle}</h4><p className="card-help">{n.linkHelp}</p>
+    <div className="link-box"><input readOnly value={url} aria-label={n.linkTitle} onFocus={e=>e.target.select()}/>
+      <button type="button" className="btn btn-primary" onClick={copyLink}>{n.copy}</button></div>
+    {state!=="idle"&&<p className={state==="ok"?"dashboard-success":"dashboard-error"} role="status">{state==="ok"?n.copied:n.copyFailed}</p>}
+    <p><a href={`#reservar/${id}`}>{n.openLink}</a></p>
+  </section>;
 }
 
 function ServiceEditor({language,service,onSessionEnded,onSaved,onBusy,onCancel}:Props & {service?:Service;onSaved:(value:Service)=>void;onBusy:(value:boolean)=>void;onCancel:()=>void}) {
@@ -192,7 +292,8 @@ function Team({data,language,onSaved,onSessionEnded}:Props & {data:Dashboard;onS
       onSaved(member);setEditing(null);
     }catch(error){if(unauthorized(error))onSessionEnded();else setFailed(true);}finally{setBusy(false);}
   }
-  return <section className="dashboard-card"><h4>{es?"Mi equipo":"My team"}</h4>
+  return <section className="dashboard-card"><h4>{es?"Trabajadores":"Staff"}</h4>
+    <p className="card-help">{es?"Cada trabajador tiene sus servicios y su propio horario. El chat de reservas solo ofrece horas en las que el trabajador está disponible.":"Each staff member has their own services and hours. The booking chat only offers times when they are available."}</p>
     <ul className="business-list">{data.team.map(m=><li key={m.id}>{m.name}<button className="dashboard-secondary" disabled={busy} onClick={()=>editMember(m)}>{copy[language].edit}</button></li>)}</ul>
     <button className="dashboard-secondary" disabled={busy} onClick={()=>editMember({id:0,name:"",service_ids:[],days:data.hours.days})}>{es?"Añadir profesional":"Add professional"}</button>
     {editing&&<form onSubmit={save}><fieldset className="dashboard-fields" disabled={busy}>
@@ -202,10 +303,9 @@ function Team({data,language,onSaved,onSessionEnded}:Props & {data:Dashboard;onS
       <button className="btn btn-primary">{copy[language].save}</button><button type="button" className="dashboard-secondary" onClick={()=>setEditing(null)}>{copy[language].cancel}</button>
       {failed&&<p role="alert">{copy[language].error}</p>}
     </fieldset></form>}
-    <p><a href={"#reservar/"+data.business.id}>{es?"Abrir enlace de reservas para compartir":"Open shareable booking link"}</a></p>
   </section>;
 }
-function Agenda({data,language}:{data:Dashboard;language:Language}){
+export function Agenda({data,language}:{data:Dashboard;language:Language}){
   const groups=new Map<string,Booking[]>();
   for(const b of data.appointments)groups.set(b.starts_at,[...(groups.get(b.starts_at)??[]),b]);
   const columns:{id:number|null;name:string}[]=data.team.map(({id,name})=>({id,name}));

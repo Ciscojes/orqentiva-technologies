@@ -11,8 +11,10 @@ Los pequeños negocios necesitan atender consultas y coordinar citas sin mezclar
 - Página comercial ES/EN y formulario de contacto que guarda solicitudes de posibles clientes.
 - Video de presentación en la página de inicio, con capítulos y subtítulos ES/EN. Se regenera a partir de la aplicación con un comando (ver [video/README.md](video/README.md)); la mención a WhatsApp que contiene es ilustrativa.
 - Inicio y cierre de sesión, roles super_admin y business_admin, sesiones revocables y contraseñas con Argon2.
-- Administrador: crear y activar negocios, habilitar agenda y crear cuentas de negocio.
-- Cliente: gestionar servicios, duración, horarios, profesionales y documentos. Consultar sus reservas.
+- Paneles con menú lateral plegable y adaptado a móvil ([SPEC-018](specs/018-panel-lateral/spec.md)).
+- Administrador: Resumen con estado del LLM y cambios recientes; crear y activar negocios, habilitar agenda y crear cuentas; ficha por negocio con su agenda en solo lectura, su base de conocimiento y el historial de cambios.
+- Cliente: Resumen del día; gestionar servicios, duración, horarios y trabajadores; consultar su agenda y compartir su enlace de reservas.
+- Base de conocimiento: documentos con plantillas, importación de PDF como borrador, eliminación, «Probar pregunta» para ver qué respondería el chat e historial de cada cambio.
 - Enlace público por negocio con disponibilidad y confirmación de citas. El cliente deja un teléfono o correo de contacto, que el negocio ve en su agenda; por WhatsApp se guarda su número automáticamente.
 - Chat con LangGraph: solicita datos, consulta disponibilidad y prepara una propuesta. La interfaz solicita confirmación y llama al backend para guardar la reserva.
 - Interpretación opcional con LLM (API compatible con OpenAI): entiende frases como «la semana que viene a media mañana con la chica de siempre». El modelo solo propone campos; el servidor los valida contra el catálogo y nunca reserva sin confirmación.
@@ -187,7 +189,13 @@ Los límites de peticiones viven en memoria, así que la publicación usa una so
 
 ## Usuarios de prueba
 
-Disponibles solo en la demostración local aislada (`tfm-demo.sqlite3`), con datos ficticios.
+Para presentar el proyecto en el entorno de desarrollo (PostgreSQL, puerto 5178), con Docker Desktop abierto:
+
+```powershell
+.\scripts\iniciar.ps1 -Demo
+```
+
+Abrir http://127.0.0.1:5178/#access. `-Demo` ejecuta `scripts/seed_demo_data.py` después de las migraciones: crea, solo si faltan, servicios, horario, trabajadores, citas futuras y base de conocimiento de alfa y beta, y deja estas tres cuentas activas con la contraseña de la tabla. Se puede repetir sin duplicar datos y se niega a ejecutarse contra una base que no sea local. Las mismas cuentas existen en la demostración aislada (`tfm-demo.sqlite3`, puerto 5179). Todos los datos son ficticios.
 
 | Rol | Usuario | Contraseña |
 | --- | --- | --- |
@@ -195,7 +203,7 @@ Disponibles solo en la demostración local aislada (`tfm-demo.sqlite3`), con dat
 | Barbería Alfa | alfa@example.com | Orqentiva-Demo-2026! |
 | Barbería Beta | beta@example.com | Orqentiva-Demo-2026! |
 
-Reservas públicas: http://127.0.0.1:5179/#reservar/alfa y http://127.0.0.1:5179/#reservar/beta
+Reservas públicas: http://127.0.0.1:5178/#reservar/alfa y http://127.0.0.1:5178/#reservar/beta (en la demostración aislada, puerto 5179)
 
 ## Enlaces del proyecto
 

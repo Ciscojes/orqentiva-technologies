@@ -1,11 +1,13 @@
 # Arranca todo lo necesario para desarrollar con un solo comando:
 #
-#   .\scripts\iniciar.ps1
+#   .\scripts\iniciar.ps1          (tus datos de desarrollo)
+#   .\scripts\iniciar.ps1 -Demo    (ademas carga los datos y cuentas de prueba para presentar)
 #
 # 1. PostgreSQL en Docker (compose.yaml, usa POSTGRES_PASSWORD del archivo .env).
 # 2. Migraciones pendientes de la base de datos.
 # 3. La API (puerto 8001) y la web (puerto 5178), cada una en su propia ventana.
 # Para detenerlo: cierra las dos ventanas; PostgreSQL sigue en marcha hasta "docker compose stop".
+param([switch]$Demo)
 $ErrorActionPreference = "Stop"
 $projectRoot = Split-Path -Parent $PSScriptRoot
 Set-Location -LiteralPath $projectRoot
@@ -17,6 +19,11 @@ if ($LASTEXITCODE -ne 0) { throw "No se pudo iniciar PostgreSQL. Comprueba que D
 Write-Host "2/3 Aplicando migraciones..."
 & "$projectRoot\.venv\Scripts\python.exe" -m alembic upgrade head
 if ($LASTEXITCODE -ne 0) { throw "Fallaron las migraciones. Revisa el mensaje anterior." }
+if ($Demo) {
+    Write-Host "   Cargando datos y cuentas de demostracion..."
+    & "$projectRoot\.venv\Scripts\python.exe" scripts\seed_demo_data.py
+    if ($LASTEXITCODE -ne 0) { throw "No se pudieron cargar los datos de demostracion. Revisa el mensaje anterior." }
+}
 
 Write-Host "3/3 Abriendo la API y la web en ventanas nuevas..."
 # Las ventanas son de cmd para no depender de la politica de ejecucion de scripts de PowerShell

@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from app.auth import UserCreate, create_user, require_super_admin, user_view
 from app.database import get_db
 from app.models import AuthSession, Business, User
+from app.services.dashboard import business_dashboard
 
 router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(require_super_admin)])
 Database = Annotated[Session, Depends(get_db)]
@@ -110,3 +111,10 @@ def add_business_user(business_id: str, payload: BusinessUserIn, session: Databa
         session.rollback()
         raise HTTPException(409, "La cuenta ya existe; no se modificó") from None
     return {**user_view(user), "is_active": user.is_active}
+
+
+@router.get("/businesses/{business_id}/dashboard")
+def business_overview(business_id: str, session: Database):
+    """Agenda, equipo, servicios y horario del negocio, en solo lectura para la administración."""
+    find_business(session, business_id)
+    return business_dashboard(session, business_id)
