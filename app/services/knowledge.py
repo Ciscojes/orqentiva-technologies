@@ -6,7 +6,8 @@ Recuperación híbrida (SPEC-019):
   pregunta aunque usen otras palabras. Los vectores se guardan en knowledge_vectors y solo se
   recalculan los párrafos nuevos o modificados.
 - Fusión: ambas listas se combinan por posición (reciprocal rank fusion) y el LLM recibe los
-  mejores MAX_CANDIDATES párrafos.
+  párrafos de más a menos relevante hasta llenar MAX_CONTEXT_CHARS (mínimo MAX_CANDIDATES):
+  con una base pequeña recibe todo, ordenado; con una grande, lo más relevante que quepa.
 Sin embeddings, o si fallan, se comporta como antes: búsqueda por palabras y, si no encuentra
 nada y el total cabe en MAX_CONTEXT_CHARS, todos los párrafos del negocio.
 Generación: si el LLM está activo, redacta la respuesta solo con esos párrafos y cita
@@ -170,10 +171,23 @@ def fuse(*rankings):
     return [order[key] for key in sorted(scores, key=lambda key: scores[key], reverse=True)]
 
 
-def retrieve(session, business_id, question, business_name, include_drafts=False, mode="hybrid"):
+def within_budget(ranked, budget):
+    """Los primeros párrafos hasta llenar budget caracteres, y al menos MAX_CANDIDATES."""
+    chosen, used = [], 0
+    for source in ranked:
+        if len(chosen) >= MAX_CANDIDATES and used + len(source["quote"]) > budget:
+            break
+        chosen.append(source)
+        used += len(source["quote"])
+    return chosen
+
+
+def retrieve(session, business_id, question, business_name, include_drafts=False, mode="hybrid",
+             budget=MAX_CONTEXT_CHARS):
     """Devuelve (fuentes literales por palabras, candidatos para el LLM, modo usado).
 
     mode: "hybrid" (predeterminado), "lexical" o "semantic"; los dos últimos los usa la evaluación.
+    budget: caracteres de contexto para el LLM; la evaluación lo reduce para simular bases grandes.
     """
     items = paragraphs(session, business_id, include_drafts)
     hits = lexical_rank(question, business_name, items)
@@ -183,8 +197,8 @@ def retrieve(session, business_id, question, business_name, include_drafts=False
         candidates = [source for _, source in hits][:MAX_CANDIDATES] or fit([public(i) for i in items])
         return sources, candidates, "lexical"
     if mode == "semantic":
-        return sources, [source for _, source in semantic][:MAX_CANDIDATES], "semantic"
-    return sources, fuse(hits, semantic)[:MAX_CANDIDATES], "hybrid"
+        return sources, within_budget([source for _, source in semantic], budget), "semantic"
+    return sources, within_budget(fuse(hits, semantic), budget), "hybrid"
 
 
 def answer(session, business_id, question, language, business_name, use_llm=False, include_drafts=False):

@@ -66,7 +66,15 @@ def test_meaning_is_found_when_words_differ(client, session_factory, semantic):
     assert mode == "hybrid" and candidates[0]["quote"] == "Hay parqueo gratuito frente al local."
     _, candidates, _ = retrieve(session_factory, "¿Me regresan la plata?", mode="semantic")
     assert candidates[0]["title"] == "Pagos" and candidates[0]["paragraph"] == 2
-    assert len(candidates) == knowledge.MAX_CANDIDATES
+    assert len(candidates) == 5  # base pequeña: el LLM recibe todo, ordenado por relevancia
+    _, few, _ = retrieve(session_factory, "¿Me regresan la plata?", mode="semantic", budget=0)
+    assert few == candidates[:knowledge.MAX_CANDIDATES]  # base grande: solo lo más relevante
+
+
+def test_budget_keeps_most_relevant_first():
+    ranked = [{"quote": "x" * 2000, "n": i} for i in range(10)]
+    assert [s["n"] for s in knowledge.within_budget(ranked, 6000)] == [0, 1, 2, 3]
+    assert len(knowledge.within_budget(ranked, 20000)) == 10
 
 
 def test_vectors_are_reused_and_follow_edits(client, session_factory, semantic):

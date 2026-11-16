@@ -13,11 +13,14 @@ La recuperación por palabras solo encuentra párrafos que comparten términos c
   - `none`: solo búsqueda por palabras.
 - El modelo local se carga en segundo plano al arrancar la API. Mientras carga, o si el proveedor falla, el RAG funciona exactamente como antes.
 - Tabla `knowledge_vectors` (migración `g019knowledgevectors`): vector por párrafo, identificado por el hash de título y texto y por el modelo. Al crear, editar, importar o eliminar documentos se borran los vectores obsoletos y se calculan solo los párrafos nuevos o modificados; al cambiar de modelo se recalculan.
-- Recuperación híbrida en `app/services/knowledge.py`: la lista por palabras y la lista por similitud del coseno se combinan con reciprocal rank fusion (k = 60) y el LLM recibe los 4 mejores párrafos. Las validaciones de citas y cifras de SPEC-015 no cambian. Sin LLM, la respuesta literal sigue saliendo de la búsqueda por palabras, para no mostrar un párrafo solo por parecido.
+- Recuperación híbrida en `app/services/knowledge.py`: la lista por palabras y la lista por similitud del coseno se combinan con reciprocal rank fusion (k = 60) y el LLM recibe los párrafos de más a menos relevante hasta llenar 6 000 caracteres, con un mínimo de cuatro: con una base pequeña recibe todo, ordenado; con una grande, lo más relevante que quepa. Las validaciones de citas y cifras de SPEC-015 no cambian. Sin LLM, la respuesta literal sigue saliendo de la búsqueda por palabras, para no mostrar un párrafo solo por parecido.
 - Los vectores se calculan para todos los documentos, pero el chat público solo compara con los publicados; los borradores solo los ve «Probar pregunta».
 - Estado en el Resumen de administración (`GET /admin/llm-status` → `embeddings`): activa, cargando, desactivada o no disponible.
 - `scripts/index_knowledge.py`: descarga el modelo y calcula los vectores de todos los negocios antes de una presentación.
 - Evaluación: `evals/rag_cases.json` (barbería ficticia, 12 documentos, 35 párrafos, 32 preguntas: 10 con las mismas palabras del documento y 22 coloquiales) y `scripts/eval_rag.py`, que compara palabras con y sin respaldo, significado e híbrido sin llamar al LLM.
+
+## Decisión tras la primera medición
+La primera versión enviaba siempre los 4 mejores párrafos ([informe](../../docs/evaluation-019/informe-inicial-4-parrafos.md), modelo local real): el correcto quedaba primero en 22/32 preguntas (8/32 con palabras) y llegaba al LLM en 26/32, frente a 8/32 de la búsqueda por palabras sin respaldo. Pero en una base pequeña recuperaba menos que el respaldo anterior, que enviaba casi todo (30/32). Por eso el envío pasó de un número fijo de párrafos a un espacio de 6 000 caracteres ordenado por relevancia: no empeora a las bases pequeñas y mantiene la mejora en las grandes.
 
 ## Fuera de alcance
 pgvector e índices aproximados (la comparación se hace en Python; suficiente para cientos de párrafos por negocio), reordenamiento con un segundo modelo, umbrales de similitud para responder sin LLM, OCR y memoria de conversación.

@@ -28,7 +28,7 @@ El grafo de LangGraph tiene tres nodos: `understand` (LLM opcional), `interpret`
 
 Las preguntas sobre el negocio usan RAG ([SPEC-015](specs/015-rag/spec.md)):
 
-1. **Recuperación híbrida ([SPEC-019](specs/019-rag-semantico/spec.md)):** combina la búsqueda por palabras con la búsqueda por significado (embeddings de un modelo multilingüe que corre en el servidor, sin coste ni envío de datos a terceros), para entender preguntas como «¿me regresan la plata si falto?». El LLM recibe los cuatro párrafos más relevantes. Sin embeddings, búsqueda léxica y, si no encuentra nada y los documentos caben en 6 000 caracteres, todos los párrafos.
+1. **Recuperación híbrida ([SPEC-019](specs/019-rag-semantico/spec.md)):** combina la búsqueda por palabras con la búsqueda por significado (embeddings de un modelo multilingüe que corre en el servidor, sin coste ni envío de datos a terceros), para entender preguntas como «¿me regresan la plata si falto?». El LLM recibe los párrafos de más a menos relevante hasta llenar 6 000 caracteres. Sin embeddings, búsqueda léxica y, si no encuentra nada y los documentos caben en 6 000 caracteres, todos los párrafos.
 2. **Generación:** el LLM redacta una respuesta breve usando solo esos párrafos e indica cuáles usó.
 3. **Validación:** se descarta la respuesta si cita párrafos que no recibió o si contiene cifras que no aparecen en ellos. En ese caso, o sin LLM, se muestra el párrafo literal.
 
