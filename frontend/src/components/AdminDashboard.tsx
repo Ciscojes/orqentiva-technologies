@@ -71,6 +71,14 @@ function Feedback({ message, language }: {message: Message; language: Language})
 }
 
 type Section = "resumen" | "negocios" | "nuevo";
+type Search = { provider: string; model: string | null; ready: boolean; loading?: boolean; error: string | null };
+function searchText(search: Search, language: Language) {
+  const es = language === "es";
+  if (search.provider === "none") return es ? "Búsqueda por significado desactivada: el RAG busca solo por palabras (EMBEDDINGS_PROVIDER=none)." : "Meaning-based search off: the RAG only matches words (EMBEDDINGS_PROVIDER=none).";
+  if (search.ready) return es ? `Búsqueda por significado activa (${search.model}).` : `Meaning-based search on (${search.model}).`;
+  if (search.loading) return es ? "Cargando el modelo de búsqueda por significado; mientras tanto el RAG busca por palabras. La primera vez descarga unos 220 MB." : "Loading the meaning-based search model; meanwhile the RAG matches words. The first time it downloads about 220 MB.";
+  return es ? `Búsqueda por significado no disponible${search.error ? ` (${search.error})` : ""}; el RAG busca por palabras.` : `Meaning-based search unavailable${search.error ? ` (${search.error})` : ""}; the RAG matches words.`;
+}
 type Tab = "estado" | "agenda" | "cuentas" | "conocimiento" | "historial";
 const nav = {
   es: { group: "Gestión", resumen: "Resumen", negocios: "Negocios", nuevo: "Nuevo negocio", panel: "Administración",
@@ -109,6 +117,7 @@ export default function AdminDashboard({ language, onSessionEnded, footer }: Pro
   const [created, setCreated] = useState<string | null>(null);
   const [changes, setChanges] = useState<Change[]>([]);
   const [llmOn, setLlmOn] = useState(true);
+  const [search, setSearch] = useState<Search | null>(null);
   useEffect(() => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
@@ -122,7 +131,7 @@ export default function AdminDashboard({ language, onSessionEnded, footer }: Pro
     }).finally(() => { clearTimeout(timeout); if (alive) setLoading(false); });
     const side = (path: string) => fetch(path, {credentials:"same-origin", cache:"no-store", signal:controller.signal}).then(r => r.ok ? r.json() : null);
     side("/admin/knowledge-changes?limit=100").then(rows => { if (alive && rows) setChanges(rows); }).catch(() => {});
-    side("/admin/llm-status").then(status => { if (alive && status) setLlmOn(status.llm_enabled); }).catch(() => {});
+    side("/admin/llm-status").then(status => { if (alive && status) { setLlmOn(status.llm_enabled); setSearch(status.embeddings ?? null); } }).catch(() => {});
     return () => { alive = false; clearTimeout(timeout); controller.abort(); };
   }, [reload, onSessionEnded]);
 
@@ -156,6 +165,7 @@ export default function AdminDashboard({ language, onSessionEnded, footer }: Pro
   else if (loadError) body = <p role="alert" className="dashboard-error">{t.error}</p>;
   else if (section === "resumen") body = <>
     <p className={llmOn ? "panel-ok" : "panel-alert"} role={llmOn ? "status" : "alert"}>{llmOn ? n.llmOn : n.llmOff}</p>
+    {search && <p className={search.ready ? "panel-ok" : "panel-alert"} role="status">{searchText(search, language)}</p>}
     <div className="metric-grid">
       <button type="button" className="metric" onClick={() => setSection("negocios")}><span>{n.total}</span><strong>{businesses.length}</strong></button>
       <div className="metric"><span>{n.activeCount}</span><strong>{businesses.filter(b => b.is_active).length}</strong></div>

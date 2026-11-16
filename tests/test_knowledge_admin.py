@@ -62,7 +62,7 @@ def test_preview_sees_drafts_only_when_asked(client):
     assert not public["sources"]
     assert not client.post("/book/alfa/chat", json={"message": QUESTION}).json().get("sources")
     assert client.post(f"{URL}/preview", headers=ADMIN, json={"question": QUESTION}).status_code == 403
-    assert client.get(f"{URL}/status", headers=ALFA).json() == {"llm_enabled": False}
+    assert client.get(f"{URL}/status", headers=ALFA).json()["llm_enabled"] is False
 
 
 def test_pdf_import_creates_drafts(client):
@@ -102,7 +102,7 @@ def test_admin_manages_any_business_knowledge(client):
     assert recent[0]["business_name"] and recent[0]["after_title"] == "Horario"
     assert client.get("/admin/knowledge-changes", headers=ALFA).status_code == 403
     assert client.delete(f"{base}/{doc['id']}", headers=ADMIN).status_code == 204
-    assert client.get("/admin/llm-status", headers=ADMIN).json() == {"llm_enabled": False}
+    assert client.get("/admin/llm-status", headers=ADMIN).json()["embeddings"]["provider"] == "none"
 
 
 def test_admin_reads_business_agenda(client):

@@ -1,0 +1,391 @@
+{
+  "_descripcion": "Barbería ficticia para medir la recuperación del RAG (SPEC-019). 'expected' lista los párrafos que responden la pregunta como [título, número de párrafo].",
+  "business": {
+    "id": "evaluacion",
+    "name": "Barbería Demo"
+  },
+  "documents": [
+    {
+      "title": "Cancelaciones y cambios",
+      "body": "Para cancelar o cambiar la hora de una cita, avisa con al menos 24 horas de anticipación por WhatsApp o desde el enlace de reservas.\n\nSi cancelas con menos de 24 horas o no te presentas a la cita, el depósito no se devuelve.\n\nSi llegas más de 15 minutos tarde, atendemos al siguiente cliente y te ofrecemos el primer espacio libre del día.",
+      "published": true
+    },
+    {
+      "title": "Pagos y depósitos",
+      "body": "Aceptamos efectivo, tarjetas de débito y crédito y SINPE Móvil al número 8888-0000.\n\nPara servicios de más de una hora pedimos un depósito del 50 % al momento de reservar.\n\nSi cancelas a tiempo, te devolvemos el depósito completo en un plazo de tres días hábiles.\n\nEmitimos factura electrónica; solicítala al pagar indicando tu cédula y tu correo.",
+      "published": true
+    },
+    {
+      "title": "Ubicación y parqueo",
+      "body": "Estamos en San Pedro de Montes de Oca, 200 metros al este de la iglesia, en un local esquinero con rótulo azul.\n\nContamos con tres espacios de parqueo gratuitos frente al local; también hay un parqueo público a 50 metros.\n\nEl local está en primer piso, sin gradas, y la entrada es accesible para sillas de ruedas.",
+      "published": true
+    },
+    {
+      "title": "Horario y feriados",
+      "body": "Atendemos de lunes a viernes de 9:00 a. m. a 7:00 p. m. y los sábados de 8:00 a. m. a 4:00 p. m.\n\nLos domingos y los feriados nacionales permanecemos cerrados.\n\nEn diciembre ampliamos el horario hasta las 9:00 p. m. de lunes a sábado.",
+      "published": true
+    },
+    {
+      "title": "Servicios para niños",
+      "body": "Atendemos a niños a partir de los 3 años; deben venir acompañados por una persona adulta.\n\nEl corte infantil incluye lavado y peinado y dura unos 30 minutos.",
+      "published": true
+    },
+    {
+      "title": "Servicios y precios",
+      "body": "El corte clásico cuesta 6 000 colones e incluye lavado con champú y peinado con cera.\n\nEl arreglo de barba con toalla caliente cuesta 4 500 colones y dura unos 25 minutos.\n\nEl paquete completo de corte y barba cuesta 9 500 colones.\n\nEl tinte para cabello o barba cuesta desde 15 000 colones; el precio final depende del largo y del color elegido.\n\nEl diseño con navaja (líneas o figuras) tiene un costo adicional de 1 500 colones sobre el corte.",
+      "published": true
+    },
+    {
+      "title": "Productos",
+      "body": "Vendemos ceras, aceites para barba y champús de marcas nacionales.\n\nLos productos abiertos no tienen cambio, salvo defecto de fábrica.",
+      "published": true
+    },
+    {
+      "title": "Higiene y seguridad",
+      "body": "Desinfectamos tijeras, máquinas y peines después de cada cliente y usamos navajas desechables.\n\nSi tienes alguna alergia en la piel, avísanos antes del servicio para usar productos hipoalergénicos.",
+      "published": true
+    },
+    {
+      "title": "Promociones y fidelidad",
+      "body": "Con cada cinco cortes pagados, el sexto es gratis; la tarjeta de sellos se lleva en la caja.\n\nLos estudiantes con carné vigente tienen un 10 % de descuento de lunes a jueves.\n\nLas promociones no son acumulables entre sí.",
+      "published": true
+    },
+    {
+      "title": "Mascotas y acompañantes",
+      "body": "Por higiene no se permiten mascotas dentro del local, excepto perros de asistencia.\n\nPuedes venir con un acompañante; tenemos sala de espera con wifi gratuito.",
+      "published": true
+    },
+    {
+      "title": "Tarjetas de regalo",
+      "body": "Vendemos tarjetas de regalo desde 10 000 colones, válidas por seis meses.\n\nLas tarjetas de regalo se pueden usar en cualquier servicio, pero no se canjean por dinero.",
+      "published": true
+    },
+    {
+      "title": "Reservas en línea",
+      "body": "Puedes reservar las 24 horas desde el enlace de reservas o escribiendo al chat de la página.\n\nAl reservar te pedimos un teléfono o correo para avisarte si hay algún cambio en tu cita.\n\nSi quieres atenderte con un barbero en particular, elígelo al reservar; si no, te asignamos al primero disponible.\n\nPara grupos de tres personas o más, como despedidas o graduaciones, escríbenos para reservar varios espacios seguidos.",
+      "published": true
+    }
+  ],
+  "cases": [
+    {
+      "question": "¿Con cuánta anticipación debo cancelar una cita?",
+      "expected": [
+        [
+          "Cancelaciones y cambios",
+          1
+        ]
+      ],
+      "kind": "literal"
+    },
+    {
+      "question": "¿Aceptan SINPE Móvil?",
+      "expected": [
+        [
+          "Pagos y depósitos",
+          1
+        ]
+      ],
+      "kind": "literal"
+    },
+    {
+      "question": "¿Tienen parqueo?",
+      "expected": [
+        [
+          "Ubicación y parqueo",
+          2
+        ]
+      ],
+      "kind": "literal"
+    },
+    {
+      "question": "¿Atienden los domingos?",
+      "expected": [
+        [
+          "Horario y feriados",
+          2
+        ]
+      ],
+      "kind": "literal"
+    },
+    {
+      "question": "¿Desde qué edad atienden a niños?",
+      "expected": [
+        [
+          "Servicios para niños",
+          1
+        ]
+      ],
+      "kind": "literal"
+    },
+    {
+      "question": "¿Venden aceite para barba?",
+      "expected": [
+        [
+          "Productos",
+          1
+        ]
+      ],
+      "kind": "literal"
+    },
+    {
+      "question": "¿Tienen descuento para estudiantes?",
+      "expected": [
+        [
+          "Promociones y fidelidad",
+          2
+        ]
+      ],
+      "kind": "literal"
+    },
+    {
+      "question": "¿Cuánto cuesta el corte clásico?",
+      "expected": [
+        [
+          "Servicios y precios",
+          1
+        ]
+      ],
+      "kind": "literal"
+    },
+    {
+      "question": "¿Venden tarjetas de regalo?",
+      "expected": [
+        [
+          "Tarjetas de regalo",
+          1
+        ]
+      ],
+      "kind": "literal"
+    },
+    {
+      "question": "¿Dan factura electrónica?",
+      "expected": [
+        [
+          "Pagos y depósitos",
+          4
+        ]
+      ],
+      "kind": "literal"
+    },
+    {
+      "question": "Si no llego a la cita, ¿me regresan la plata que adelanté?",
+      "expected": [
+        [
+          "Cancelaciones y cambios",
+          2
+        ]
+      ],
+      "kind": "coloquial"
+    },
+    {
+      "question": "¿Puedo pagar con el celular?",
+      "expected": [
+        [
+          "Pagos y depósitos",
+          1
+        ]
+      ],
+      "kind": "coloquial"
+    },
+    {
+      "question": "¿Dónde dejo el carro?",
+      "expected": [
+        [
+          "Ubicación y parqueo",
+          2
+        ]
+      ],
+      "kind": "coloquial"
+    },
+    {
+      "question": "¿Qué pasa si me atraso un rato?",
+      "expected": [
+        [
+          "Cancelaciones y cambios",
+          3
+        ]
+      ],
+      "kind": "coloquial"
+    },
+    {
+      "question": "¿Abren el día de la independencia?",
+      "expected": [
+        [
+          "Horario y feriados",
+          2
+        ]
+      ],
+      "kind": "coloquial"
+    },
+    {
+      "question": "¿Mi hijo de 5 años puede ir solo?",
+      "expected": [
+        [
+          "Servicios para niños",
+          1
+        ]
+      ],
+      "kind": "coloquial"
+    },
+    {
+      "question": "¿Las navajas son nuevas para cada persona?",
+      "expected": [
+        [
+          "Higiene y seguridad",
+          1
+        ]
+      ],
+      "kind": "coloquial"
+    },
+    {
+      "question": "Tengo la piel sensible, ¿hay algún problema?",
+      "expected": [
+        [
+          "Higiene y seguridad",
+          2
+        ]
+      ],
+      "kind": "coloquial"
+    },
+    {
+      "question": "¿Hay algún beneficio por ir seguido?",
+      "expected": [
+        [
+          "Promociones y fidelidad",
+          1
+        ]
+      ],
+      "kind": "coloquial"
+    },
+    {
+      "question": "¿Puedo juntar el descuento de estudiante con otra oferta?",
+      "expected": [
+        [
+          "Promociones y fidelidad",
+          3
+        ]
+      ],
+      "kind": "coloquial"
+    },
+    {
+      "question": "¿Puedo ir con mi perro guía?",
+      "expected": [
+        [
+          "Mascotas y acompañantes",
+          1
+        ]
+      ],
+      "kind": "coloquial"
+    },
+    {
+      "question": "Mientras espero, ¿hay internet?",
+      "expected": [
+        [
+          "Mascotas y acompañantes",
+          2
+        ]
+      ],
+      "kind": "coloquial"
+    },
+    {
+      "question": "¿Me cambian un champú que ya abrí?",
+      "expected": [
+        [
+          "Productos",
+          2
+        ]
+      ],
+      "kind": "coloquial"
+    },
+    {
+      "question": "¿Por cuánto tiempo sirve el bono de regalo?",
+      "expected": [
+        [
+          "Tarjetas de regalo",
+          1
+        ]
+      ],
+      "kind": "coloquial"
+    },
+    {
+      "question": "Si me regalan una tarjeta, ¿me pueden dar el efectivo?",
+      "expected": [
+        [
+          "Tarjetas de regalo",
+          2
+        ]
+      ],
+      "kind": "coloquial"
+    },
+    {
+      "question": "¿Hasta qué hora atienden en Navidad?",
+      "expected": [
+        [
+          "Horario y feriados",
+          3
+        ]
+      ],
+      "kind": "coloquial"
+    },
+    {
+      "question": "¿Pueden entrar personas en silla de ruedas?",
+      "expected": [
+        [
+          "Ubicación y parqueo",
+          3
+        ]
+      ],
+      "kind": "coloquial"
+    },
+    {
+      "question": "¿Tengo que adelantar algo para un servicio largo?",
+      "expected": [
+        [
+          "Pagos y depósitos",
+          2
+        ]
+      ],
+      "kind": "coloquial"
+    },
+    {
+      "question": "¿Cómo llego? ¿Dónde quedan?",
+      "expected": [
+        [
+          "Ubicación y parqueo",
+          1
+        ]
+      ],
+      "kind": "coloquial"
+    },
+    {
+      "question": "¿Cuánto me sale arreglarme el pelo y la barba juntos?",
+      "expected": [
+        [
+          "Servicios y precios",
+          3
+        ]
+      ],
+      "kind": "coloquial"
+    },
+    {
+      "question": "Somos cinco amigos para una despedida de soltero, ¿cómo hacemos?",
+      "expected": [
+        [
+          "Reservas en línea",
+          4
+        ]
+      ],
+      "kind": "coloquial"
+    },
+    {
+      "question": "¿Puedo escoger quién me corta?",
+      "expected": [
+        [
+          "Reservas en línea",
+          3
+        ]
+      ],
+      "kind": "coloquial"
+    }
+  ]
+}

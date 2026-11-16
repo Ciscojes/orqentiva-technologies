@@ -54,6 +54,19 @@ class KnowledgeDocument(Base):
     published: Mapped[bool] = mapped_column(Boolean, server_default=text("false"), default=False)
 
 
+class KnowledgeVector(Base):
+    """Embedding de un párrafo de la base de conocimiento (SPEC-019).
+
+    Se identifica por el hash del título y el texto del párrafo: editar un documento solo
+    obliga a recalcular los párrafos que cambiaron. model separa vectores de modelos distintos.
+    """
+    __tablename__ = "knowledge_vectors"
+    business_id: Mapped[str] = mapped_column(ForeignKey("businesses.id"), primary_key=True)
+    model: Mapped[str] = mapped_column(String(200), primary_key=True)
+    text_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    vector: Mapped[list] = mapped_column(JSON)
+
+
 class KnowledgeChange(Base):
     """Historial de la base de conocimiento: quién cambió qué documento y cómo estaba antes.
 

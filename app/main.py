@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import SQLAlchemyError
 
-from app import llm
+from app import embeddings, llm
 from app.routes.admin import router as admin_router
 from app.routes.appointments import router as appointments_router
 from app.routes.auth import router as auth_router
@@ -28,6 +28,13 @@ from app.routes.whatsapp import router as whatsapp_router
 async def lifespan(app):
     # Al arrancar, la terminal de la API dice si el chat usará el LLM o solo reglas.
     (llm.logger.info if llm.enabled() else llm.logger.warning)(llm.status())
+    # El modelo de embeddings se carga en segundo plano; mientras tanto el RAG busca por palabras.
+    if embeddings.enabled():
+        embeddings.logger.info("Búsqueda por significado: %s (%s), cargando en segundo plano",
+                               embeddings.provider(), embeddings.model_name())
+        embeddings.warm_up()
+    else:
+        embeddings.logger.warning("Búsqueda por significado desactivada (EMBEDDINGS_PROVIDER=none)")
     yield
 
 
