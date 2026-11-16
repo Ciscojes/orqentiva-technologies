@@ -117,3 +117,16 @@ Límites de esta ampliación:
 - La importación de PDF se probó con PDF generados en las pruebas; no con documentos reales de negocios ni escaneados.
 - No se probó en Safari, teléfonos reales ni con lectores de pantalla.
 - El recorrido visual de reservas públicas y confirmación sigue sin certificarse.
+
+## Ampliación del 15 de noviembre de 2026: RAG semántico (SPEC-019)
+
+Rama `rag-semantico`. Especificación: [SPEC-019](../specs/019-rag-semantico/spec.md). Migración `g019knowledgevectors` y dependencia `fastembed`.
+
+| Verificación | Resultado |
+| --- | --- |
+| Suite Python | 254 pruebas aprobadas, 6 nuevas con un modelo de embeddings simulado; la misma falla previa de Python 3.10 indicada arriba |
+| Compilación TypeScript/Vite y lint oxlint | Aprobados |
+| Línea base de recuperación ([informe](evaluation-019/linea-base.md)) | Palabras con respaldo: párrafo correcto en 30/32 enviando 24,4 párrafos de media; sin respaldo (base > 6 000 caracteres): 8/32, y 0/22 coloquiales |
+| Recuperación con el modelo local real | Pendiente: se ejecuta en el equipo del autor con `python scripts/eval_rag.py --report docs/evaluation-019/informe-rag.md` |
+
+Límites: el entorno aislado de desarrollo no puede descargar modelos de Hugging Face, por lo que la integración con fastembed no se ejecutó allí con el modelo real. El conjunto de evaluación es pequeño y ficticio, y mide la recuperación, no la calidad de la respuesta redactada por el LLM.
