@@ -47,7 +47,8 @@ const copy = {
     pdfDone: (n: number) => n === 1 ? "PDF importado como borrador. Revísalo y publícalo." : `PDF importado en ${n} borradores. Revísalos y publícalos.`,
     test: "Probar pregunta", testHelp: "Escribe una pregunta como la haría un cliente y mira qué respondería el chat.", question: "Pregunta", ask: "Probar", asking: "Consultando…",
     drafts: "Incluir borradores en la prueba", answer: "Respuesta del chat", sourcesUsed: "Párrafos usados", noSources: "No usó ningún documento.",
-    generatedNote: "Redactada por la IA a partir de tus documentos.", literalNote: "Párrafo literal (sin IA).",
+    generatedNote: "Redactada por la IA a partir de tus documentos.", literalNote: "Párrafo literal de tus documentos (la IA no redactó esta respuesta).",
+    aiNotFound: "La IA revisó tus documentos y no encontró esta información. Agrega un documento que la cubra.", noAi: "Sin IA: solo se buscan coincidencias de palabras.",
     error: "No se pudo completar la operación. Inténtalo de nuevo.", limit: "Llegaste al máximo de 50 documentos. Elimina alguno para añadir más.",
     pdfErrors: { 413: "El PDF supera 5 MB.", 415: "El archivo debe ser un PDF.", 422: "No se pudo extraer texto del PDF. Si es un documento escaneado o una imagen, copia el texto a mano." } as Record<number, string>,
     unsaved: "Tienes cambios sin guardar en el formulario.",
@@ -64,7 +65,8 @@ const copy = {
     pdfDone: (n: number) => n === 1 ? "PDF imported as a draft. Review and publish it." : `PDF imported as ${n} drafts. Review and publish them.`,
     test: "Test a question", testHelp: "Type a question the way a customer would and see what the chat would answer.", question: "Question", ask: "Test", asking: "Checking…",
     drafts: "Include drafts in the test", answer: "Chat answer", sourcesUsed: "Paragraphs used", noSources: "No document was used.",
-    generatedNote: "Written by the AI from your documents.", literalNote: "Literal paragraph (no AI).",
+    generatedNote: "Written by the AI from your documents.", literalNote: "Literal paragraph from your documents (the AI did not write this answer).",
+    aiNotFound: "The AI checked your documents and didn't find this information. Add a document that covers it.", noAi: "No AI: only matching words are searched.",
     error: "The operation could not be completed. Try again.", limit: "You reached the 50-document limit. Delete one to add more.",
     pdfErrors: { 413: "The PDF is larger than 5 MB.", 415: "The file must be a PDF.", 422: "No text could be extracted. If it's a scanned document or an image, copy the text manually." } as Record<number, string>,
     unsaved: "You have unsaved changes in the form.",
@@ -224,7 +226,7 @@ function QuestionTester({ language, basePath, onSessionEnded }: { language: Lang
     {result && <div className="chat-preview" aria-live="polite">
       <p className="chat-preview-label">{t.answer}</p>
       <div className="chat-bubble">{result.reply}</div>
-      <small>{result.generated ? t.generatedNote : t.literalNote}</small>
+      <small>{!result.llm_enabled ? t.noAi : result.generated ? t.generatedNote : result.sources.length ? t.literalNote : t.aiNotFound}</small>
       <p className="chat-preview-label">{t.sourcesUsed}</p>
       {result.sources.length === 0 ? <p>{t.noSources}</p> : <ul className="source-list">{result.sources.map(source =>
         <li key={`${source.title}-${source.paragraph}`}><strong>{source.title} · §{source.paragraph}</strong><q>{source.quote}</q></li>)}</ul>}
