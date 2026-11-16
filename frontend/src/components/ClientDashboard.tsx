@@ -7,7 +7,7 @@ type Service = {id:number; name:string; price_crc:number; duration_minutes:numbe
 type Day = {weekday:number; is_closed:boolean; opens_at:string|null; closes_at:string|null};
 type Hours = {configured:boolean; days:Day[]};
 type Booking = {id:number; customer_name:string; customer_contact?:string|null; starts_at:string; professional_id?:number; service_id?:number};
-type Dashboard = {team:Member[]; booking_enabled:boolean; business:{id:string; name:string; time_zone:string}; services:Service[]; hours:Hours; appointments:Booking[]};
+export type Dashboard = {team:Member[]; booking_enabled:boolean; business:{id:string; name:string; time_zone:string}; services:Service[]; hours:Hours; appointments:Booking[]};
 type Props = {language:Language; onSessionEnded:()=>void};
 const copy = {
   es: {
@@ -305,7 +305,7 @@ function Team({data,language,onSaved,onSessionEnded}:Props & {data:Dashboard;onS
     </fieldset></form>}
   </section>;
 }
-function Agenda({data,language}:{data:Dashboard;language:Language}){
+export function Agenda({data,language}:{data:Dashboard;language:Language}){
   const groups=new Map<string,Booking[]>();
   for(const b of data.appointments)groups.set(b.starts_at,[...(groups.get(b.starts_at)??[]),b]);
   const columns:{id:number|null;name:string}[]=data.team.map(({id,name})=>({id,name}));

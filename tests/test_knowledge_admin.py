@@ -103,3 +103,10 @@ def test_admin_manages_any_business_knowledge(client):
     assert client.get("/admin/knowledge-changes", headers=ALFA).status_code == 403
     assert client.delete(f"{base}/{doc['id']}", headers=ADMIN).status_code == 204
     assert client.get("/admin/llm-status", headers=ADMIN).json() == {"llm_enabled": False}
+
+
+def test_admin_reads_business_agenda(client):
+    assert client.get("/admin/businesses/alfa/dashboard", headers=ALFA).status_code == 403
+    assert client.get("/admin/businesses/nadie/dashboard", headers=ADMIN).status_code == 404
+    data = client.get("/admin/businesses/alfa/dashboard", headers=ADMIN).json()
+    assert data == client.get("/client/dashboard", headers=ALFA).json()

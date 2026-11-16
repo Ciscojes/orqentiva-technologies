@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import AdminDashboard from "./AdminDashboard";
 import ClientDashboard from "./ClientDashboard";
+import { Icon } from "./PanelLayout";
 import type { Language } from "../services";
 
 type Account = { id: number; email: string; role: "super_admin" | "business_admin"; business_id: string | null };
@@ -113,7 +114,7 @@ export default function AccessPanel({ language, locationHash, onSessionChange }:
   const accountBox = account && <div className="panel-account" aria-busy={busy}>
     <p className="panel-account-email" ref={welcome} tabIndex={-1}><span className="sr-only">{t.welcome}: </span>{account.email}</p>
     <small>{account.role === "super_admin" ? t.admin : t.business}</small>
-    <button type="button" className="panel-logout" onClick={logout} disabled={busy}>{busy ? t.busy : t.logout}</button>
+    <button type="button" className="panel-logout" onClick={logout} disabled={busy} title={t.logout} aria-label={t.logout}><Icon name="logout" /><span className="panel-logout-label">{busy ? t.busy : t.logout}</span></button>
   </div>;
   return <section className={account ? "access-section has-panel" : "access-section"} id="access" aria-labelledby="access-title">
     <h1 id="access-title" tabIndex={-1} className={account ? "sr-only" : undefined}>{t.title}</h1>{!account && <p>{t.intro}</p>}

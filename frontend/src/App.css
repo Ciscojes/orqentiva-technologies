@@ -724,7 +724,9 @@ html { scroll-padding-top: calc(var(--header-height, 140px) + 12px); }
 .panel-account small { color: #9bafc0; display: block; margin: 2px 0 10px; }
 .panel-logout { width: 100%; min-height: 40px; border-radius: 8px; border: 1px solid #ffffff40; background: transparent; color: white; font: inherit; font-weight: 600; cursor: pointer; }
 .panel-logout:hover { background: #ffffff14; }
-.is-collapsed .panel-sidebar-title, .is-collapsed .panel-group-label, .is-collapsed .panel-link-label, .is-collapsed .panel-badge, .is-collapsed .panel-account { display: none; }
+.panel-logout { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.is-collapsed .panel-sidebar-title, .is-collapsed .panel-group-label, .is-collapsed .panel-link-label, .is-collapsed .panel-badge, .is-collapsed .panel-account-email, .is-collapsed .panel-account small, .is-collapsed .panel-logout-label { display: none; }
+.is-collapsed .panel-account { padding: 0; }
 .is-collapsed .panel-sidebar-head { flex-direction: column; padding-inline: 0; }
 .is-collapsed .panel-link { justify-content: center; padding: 8px; }
 .is-collapsed .panel-group { margin-top: 4px; border-top: 1px solid #ffffff14; padding-top: 4px; }
@@ -805,7 +807,8 @@ button.metric:hover { border-color: #36c6c0; }
   .panel-collapse { display: none; }
   .panel-close { display: block; }
   .panel-menu-toggle { display: inline-grid; place-items: center; }
-  .is-collapsed .panel-sidebar-title, .is-collapsed .panel-group-label, .is-collapsed .panel-link-label, .is-collapsed .panel-badge, .is-collapsed .panel-account { display: revert; }
+  .is-collapsed .panel-sidebar-title, .is-collapsed .panel-group-label, .is-collapsed .panel-link-label, .is-collapsed .panel-badge, .is-collapsed .panel-account-email, .is-collapsed .panel-account small, .is-collapsed .panel-logout-label { display: revert; }
+  .is-collapsed .panel-account { padding: 4px 6px; }
   .is-collapsed .panel-sidebar-head { flex-direction: row; }
   .is-collapsed .panel-link { justify-content: flex-start; padding: 8px 12px; }
   .panel-topbar { position: sticky; top: var(--header-height, 70px); z-index: 5; background: #eaf2f7; padding: 8px 0; }

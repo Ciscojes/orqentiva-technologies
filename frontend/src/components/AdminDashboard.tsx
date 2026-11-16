@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import type { Language } from "../services";
 import KnowledgeHistory, { actionLabels, formatDate, type Change } from "./KnowledgeHistory";
 import KnowledgeManager from "./KnowledgeManager";
+import { Agenda, type Dashboard } from "./ClientDashboard";
 import PanelLayout, { type PanelGroup } from "./PanelLayout";
 
 type Business = { id: string; name: string; is_active: boolean; booking_enabled: boolean };
@@ -70,20 +71,22 @@ function Feedback({ message, language }: {message: Message; language: Language})
 }
 
 type Section = "resumen" | "negocios" | "nuevo";
-type Tab = "estado" | "cuentas" | "conocimiento" | "historial";
+type Tab = "estado" | "agenda" | "cuentas" | "conocimiento" | "historial";
 const nav = {
   es: { group: "Gestión", resumen: "Resumen", negocios: "Negocios", nuevo: "Nuevo negocio", panel: "Administración",
     total: "Negocios", activeCount: "Activos", withAgenda: "Con agenda", changedWeek: "Cambiaron su base esta semana",
     llmOn: "Asistente de IA activo", llmOff: "Asistente de IA desactivado: el chat de todos los negocios responde sin IA. Revisa LLM_API_KEY y LLM_MODEL en el servidor.",
     recent: "Cambios recientes en las bases de conocimiento", noRecent: "Todavía no hay cambios.", open: "Ver negocio", back: "Volver a la lista de negocios",
-    tabs: { estado: "Estado", cuentas: "Cuentas", conocimiento: "Base de conocimiento", historial: "Historial de cambios" } as Record<Tab, string>,
+    tabs: { estado: "Estado", agenda: "Agenda", cuentas: "Cuentas", conocimiento: "Base de conocimiento", historial: "Historial de cambios" } as Record<Tab, string>,
+    agendaTitle: "Agenda del negocio", agendaRead: "Vista de solo lectura: las citas las gestiona el negocio desde su panel.", agendaDisabled: "Este negocio no tiene la agenda de citas habilitada. Actívala en la pestaña Estado.", noBookings: "Todavía no hay reservas registradas.", team: "Trabajadores", services: "Servicios activos", upcoming: "Próximas citas",
     agendaHelp: "Con la agenda habilitada, el negocio ve Agenda, Servicios, Trabajadores, Horario y su base de conocimiento.",
     agendaOn: "Agenda activada.", agendaOff: "Agenda desactivada.", tabsLabel: "Secciones del negocio", createdGo: "Ir a su ficha" },
   en: { group: "Management", resumen: "Overview", negocios: "Businesses", nuevo: "New business", panel: "Administration",
     total: "Businesses", activeCount: "Active", withAgenda: "With scheduling", changedWeek: "Changed their knowledge base this week",
     llmOn: "AI assistant on", llmOff: "AI assistant off: every business's chat answers without AI. Check LLM_API_KEY and LLM_MODEL on the server.",
     recent: "Recent knowledge base changes", noRecent: "No changes yet.", open: "View business", back: "Back to business list",
-    tabs: { estado: "Status", cuentas: "Accounts", conocimiento: "Knowledge base", historial: "Change history" } as Record<Tab, string>,
+    tabs: { estado: "Status", agenda: "Schedule", cuentas: "Accounts", conocimiento: "Knowledge base", historial: "Change history" } as Record<Tab, string>,
+    agendaTitle: "Business schedule", agendaRead: "Read-only view: the business manages appointments from its own dashboard.", agendaDisabled: "This business doesn't have appointment scheduling enabled. Turn it on in the Status tab.", noBookings: "No bookings recorded yet.", team: "Staff", services: "Active services", upcoming: "Upcoming appointments",
     agendaHelp: "With scheduling enabled, the business sees Schedule, Services, Staff, Opening hours and its knowledge base.",
     agendaOn: "Scheduling enabled.", agendaOff: "Scheduling disabled.", tabsLabel: "Business sections", createdGo: "Go to its page" },
 };
@@ -185,6 +188,7 @@ export default function AdminDashboard({ language, onSessionEnded, footer }: Pro
     </div>
     <div id="business-tabpanel" role="tabpanel" aria-labelledby={`tab-${tab}`}>
       {tab === "conocimiento" ? <KnowledgeManager key={business.id} language={language} basePath={`/admin/businesses/${encodeURIComponent(business.id)}/documents`} statusPath="/admin/llm-status" onSessionEnded={onSessionEnded} />
+        : tab === "agenda" ? <BusinessAgenda key={business.id} businessId={business.id} language={language} onSessionEnded={onSessionEnded} />
         : tab === "historial" ? <KnowledgeHistory key={business.id} language={language} businessId={business.id} onSessionEnded={onSessionEnded} />
         : <BusinessManager key={business.id} business={business} language={language} view={tab} onSessionEnded={onSessionEnded}
           onChange={updated => setBusinesses(previous => previous.map(item => item.id === updated.id ? updated : item))} />}
@@ -299,4 +303,34 @@ function BusinessManager({ business, language, view, onChange, onSessionEnded }:
       </section>
     </div>
   </section>;
+}
+
+function BusinessAgenda({ businessId, language, onSessionEnded }: { businessId: string; language: Language; onSessionEnded: () => void }) {
+  const t = copy[language];
+  const n = nav[language];
+  const [data, setData] = useState<Dashboard | null>(null);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    const controller = new AbortController();
+    adminRequest(`/${encodeURIComponent(businessId)}/dashboard`, {signal: controller.signal}).then(setData).catch(error => {
+      if (controller.signal.aborted) return;
+      if (sessionLost(error)) onSessionEnded(); else setFailed(true);
+    });
+    return () => controller.abort();
+  }, [businessId, onSessionEnded]);
+  if (failed) return <p className="dashboard-error" role="alert">{t.error}</p>;
+  if (!data) return <p role="status">{t.loading}</p>;
+  if (!data.booking_enabled) return <section className="dashboard-card"><p>{n.agendaDisabled}</p></section>;
+  const upcoming = data.appointments.filter(b => new Date(b.starts_at) >= new Date()).length;
+  return <>
+    <div className="metric-grid">
+      <div className="metric"><span>{n.upcoming}</span><strong>{upcoming}</strong></div>
+      <div className="metric"><span>{n.team}</span><strong>{data.team.length}</strong></div>
+      <div className="metric"><span>{n.services}</span><strong>{data.services.filter(s => s.is_active).length}</strong></div>
+    </div>
+    <section className="dashboard-card" aria-labelledby="admin-agenda-title"><h4 id="admin-agenda-title">{n.agendaTitle}</h4>
+      <p className="card-help">{n.agendaRead}</p>
+      {data.appointments.length === 0 ? <p>{n.noBookings}</p> : <Agenda data={data} language={language} />}
+    </section>
+  </>;
 }

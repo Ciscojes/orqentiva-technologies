@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { Language } from "../services";
 
 /** Menú lateral compartido por el panel de administración y el panel del negocio. */
-export type IconName = "home" | "calendar" | "tag" | "users" | "clock" | "book" | "link" | "store" | "plus" | "history" | "key" | "shield";
+export type IconName = "home" | "calendar" | "tag" | "users" | "clock" | "book" | "link" | "store" | "plus" | "history" | "key" | "shield" | "logout";
 export type PanelSection = { id: string; label: string; icon: IconName; badge?: number };
 export type PanelGroup = { label: string; sections: PanelSection[] };
 type Props = {
@@ -23,6 +23,7 @@ const PATHS: Record<IconName, string> = {
   history: "M12 8v4l2 2M3.05 11a9 9 0 1 1 .5 4M3 20v-5h5",
   key: "M16.5 3a4.5 4.5 0 0 1 .5 8.97L13 16H11v2H9v2H4v-3.5l6.03-6.03A4.5 4.5 0 0 1 16.5 3zM17 7.5h.01",
   shield: "M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z",
+  logout: "M14 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-2M9 12h12l-3-3m0 6l3-3",
 };
 
 export function Icon({ name }: { name: IconName }) {
