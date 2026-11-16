@@ -1,17 +1,19 @@
 # Panel de administrador — SPEC-008
 
+> Actualizado con SPEC-018 (15 de noviembre de 2026): menú lateral con «Resumen», «Negocios» y «Nuevo negocio», y ficha de cada negocio con pestañas. Ver [Ficha del negocio](#ficha-del-negocio).
+
 ## Uso local
 
 Abrir http://127.0.0.1:5178/#access con la cuenta super_admin. Si ya hay sesión,
 recargar la página. Un business_admin no ve el panel y recibe 403 en sus rutas.
 
-1. Crear negocio: identificador único de minúsculas, números y guiones, y nombre.
+1. Crear negocio desde «Nuevo negocio»: identificador único de minúsculas, números y guiones, y nombre.
    El identificador no se modifica después.
-2. Seleccionar «Gestionar» en el negocio.
-3. Crear su cuenta de cliente con correo y contraseña inicial, repetida para confirmar.
+2. En «Negocios», seleccionar «Gestionar» en el negocio para abrir su ficha.
+3. En la pestaña «Cuentas», crear su cuenta de cliente con correo y contraseña inicial, repetida para confirmar.
    El servidor fija business_admin y el negocio seleccionado; no se envía correo.
 4. Comunicar la contraseña al titular por un canal privado. No guardarla en Git.
-5. Desactivar requiere confirmación: conserva datos, cierra sesiones e impide login.
+5. En la pestaña «Estado», desactivar requiere confirmación: conserva datos, cierra sesiones e impide login.
 6. Reactivar permite nuevos logins, pero no recupera sesiones anteriores.
 
 No incluye traslado de cuentas, eliminación de negocios, cambio de contraseñas ni
@@ -56,3 +58,19 @@ Navegación: usar «Acceso clientes» en la cabecera para iniciar sesión y «Mi
 ## Alta después del acuerdo comercial
 
 Una solicitud en el sitio registra un contacto comercial. Una vez acordado el servicio, crea el negocio y su cuenta desde Administración. Marca **Incluir agenda de citas** para un negocio que contrata reservas. También puedes habilitar o deshabilitar esta opción en la ficha de un negocio existente. Deshabilitar cierra el enlace público y conserva su historial. Una cuenta sin agenda puede acceder al panel básico. Los pedidos y las integraciones con agentes requieren sus propios flujos antes de ofrecerlos como funcionalidades activas.
+
+## Resumen y ficha del negocio
+
+El **Resumen** muestra si el asistente de IA (LLM) está activo, el número de negocios, activos y con agenda, cuántos cambiaron su base de conocimiento en la última semana y los cambios más recientes, con acceso directo al historial de cada negocio.
+
+## Ficha del negocio
+
+| Pestaña | Contenido |
+| --- | --- |
+| Estado | Activar o desactivar el negocio y habilitar la agenda de citas |
+| Agenda | Próximas citas, trabajadores y servicios activos, y la agenda por profesional en solo lectura |
+| Cuentas | Cuentas del negocio y creación de nuevas |
+| Base de conocimiento | Las mismas herramientas que el negocio: documentos, plantillas, PDF, eliminar y «Probar pregunta» |
+| Historial de cambios | Quién cambió qué documento y cuándo; lo eliminado en rojo y lo agregado en verde; recargar como borrador un documento eliminado |
+
+Así se puede cargar la base inicial al dar de alta a un cliente y revisar después lo que él cambie, sin entrar con su cuenta. Rutas en [SPEC-018](../specs/018-panel-lateral/spec.md).

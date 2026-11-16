@@ -99,3 +99,21 @@ Límites de esta ampliación:
   al registro de imágenes); allí solo se validó el archivo y el comando de arranque.
 - No se registra aquí el resultado de GitHub Actions para este commit.
 - La revisión visual de paneles descrita arriba sigue incompleta.
+
+## Ampliación del 15 de noviembre de 2026: paneles con menú lateral y base de conocimiento
+
+Rama `panel-lateral`, integrada en main. Especificación: [SPEC-018](../specs/018-panel-lateral/spec.md). Incluye la migración `f016knowledgechanges` y la dependencia `pypdf`.
+
+| Verificación | Resultado |
+| --- | --- |
+| Suite Python | 248 pruebas aprobadas, 9 nuevas, en un entorno Linux aislado con Python 3.10. Falla `test_legacy_import.py::test_new_business_service_and_booking_are_inserted_together`, previa a esta ampliación: usa `datetime.fromisoformat` con sufijo `Z`, admitido desde Python 3.11; el proyecto usa 3.13 |
+| Compilación TypeScript/Vite y lint oxlint | Aprobados |
+| Revisión visual en Chromium | Web compilada sobre una copia SQLite con datos ficticios, 1440 px y 390 px: menú desplegado, plegado y móvil; Resumen, Agenda, Servicios, Trabajadores, base de conocimiento, historial con cambios resaltados y pestaña Agenda de administración |
+| Entorno de desarrollo del autor (PostgreSQL, 5178) | Inicio de sesión con la cuenta de prueba de Alfa; «Probar pregunta» con el LLM real: respuesta redactada con cita a un documento propio y respuesta «sin información» cuando no había documento |
+
+Límites de esta ampliación:
+
+- No se ejecutó `scripts/verify_postgres.py` ni la migración nueva sobre un PostgreSQL temporal; el autor la aplicó con `iniciar.ps1` en su base de desarrollo.
+- La importación de PDF se probó con PDF generados en las pruebas; no con documentos reales de negocios ni escaneados.
+- No se probó en Safari, teléfonos reales ni con lectores de pantalla.
+- El recorrido visual de reservas públicas y confirmación sigue sin certificarse.

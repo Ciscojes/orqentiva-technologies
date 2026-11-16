@@ -14,5 +14,8 @@ Responder preguntas sobre las políticas del negocio en lenguaje natural, sin in
 ## Fuera de alcance
 Embeddings, base vectorial y memoria de conversación.
 
+## Ampliación
+SPEC-018 añade la gestión desde los paneles: «Probar pregunta» (misma consulta, con borradores opcionales y solo desde los paneles), importación de PDF, eliminación e historial de cambios.
+
 ## Verificación
 `tests/test_rag.py` (8 pruebas con el modelo simulado) y `scripts/check_llm.py` con el proveedor real.

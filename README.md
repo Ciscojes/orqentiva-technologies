@@ -11,8 +11,10 @@ Los pequeños negocios necesitan atender consultas y coordinar citas sin mezclar
 - Página comercial ES/EN y formulario de contacto que guarda solicitudes de posibles clientes.
 - Video de presentación en la página de inicio, con capítulos y subtítulos ES/EN. Se regenera a partir de la aplicación con un comando (ver [video/README.md](video/README.md)); la mención a WhatsApp que contiene es ilustrativa.
 - Inicio y cierre de sesión, roles super_admin y business_admin, sesiones revocables y contraseñas con Argon2.
-- Administrador: crear y activar negocios, habilitar agenda y crear cuentas de negocio.
-- Cliente: gestionar servicios, duración, horarios, profesionales y documentos. Consultar sus reservas.
+- Paneles con menú lateral plegable y adaptado a móvil ([SPEC-018](specs/018-panel-lateral/spec.md)).
+- Administrador: Resumen con estado del LLM y cambios recientes; crear y activar negocios, habilitar agenda y crear cuentas; ficha por negocio con su agenda en solo lectura, su base de conocimiento y el historial de cambios.
+- Cliente: Resumen del día; gestionar servicios, duración, horarios y trabajadores; consultar su agenda y compartir su enlace de reservas.
+- Base de conocimiento: documentos con plantillas, importación de PDF como borrador, eliminación, «Probar pregunta» para ver qué respondería el chat e historial de cada cambio.
 - Enlace público por negocio con disponibilidad y confirmación de citas. El cliente deja un teléfono o correo de contacto, que el negocio ve en su agenda; por WhatsApp se guarda su número automáticamente.
 - Chat con LangGraph: solicita datos, consulta disponibilidad y prepara una propuesta. La interfaz solicita confirmación y llama al backend para guardar la reserva.
 - Interpretación opcional con LLM (API compatible con OpenAI): entiende frases como «la semana que viene a media mañana con la chica de siempre». El modelo solo propone campos; el servidor los valida contra el catálogo y nunca reserva sin confirmación.
